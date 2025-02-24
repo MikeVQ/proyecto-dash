@@ -1,0 +1,204 @@
+/* 🏠 Configuración general */
+body {
+    background-color: #f4f6f9;
+    font-family: "Arial", sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* 📌 Contenedor principal */
+.dashboard-container {
+    width: 90%;
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+/* 🎯 Título del Dashboard */
+.dashboard-title {
+    font-size: 2.5rem;
+    color: #4D96FF;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* 🔎 Barra de búsqueda */
+.search-bar {
+    padding: 12px;
+    width: 60%;
+    margin: 0 auto 20px;
+    display: block;
+    border-radius: 25px;
+    border: 2px solid #4D96FF;
+    font-size: 1rem;
+    text-align: center;
+    background: white;
+    color: #333;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+.search-bar:focus {
+    outline: none;
+    border-color: #357ABD;
+    box-shadow: 0px 4px 12px rgba(77, 150, 255, 0.3);
+}
+
+/* 📊 Tarjetas de estadísticas */
+.stats-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    width: 250px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.stat-card:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
+/* 📌 Contenedor flexible para tabla y gráficos */
+.content-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+/* 📝 Tabla de datos */
+.table-container {
+    width: 100%;
+    max-width: 800px;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    overflow-x: auto;
+}
+
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dashboard-table th,
+.dashboard-table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.dashboard-table th {
+    background: #4D96FF;
+    color: white;
+    font-weight: bold;
+}
+
+.dashboard-table tr:nth-child(even) {
+    background: #f2f2f2;
+}
+/* 🎛 Contenedor de filtros */
+.filter-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* 📅 Estilos para select y date picker */
+.filter-select, .date-picker {
+    padding: 8px;
+    border: 2px solid #4D96FF;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    color: #333;
+    transition: all 0.3s ease-in-out;
+}
+
+.filter-select:focus, .date-picker:focus {
+    outline: none;
+    border-color: #357ABD;
+}
+
+/* 🎯 Botón de aplicar filtro */
+.apply-filter-btn {
+    background: #4D96FF;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.apply-filter-btn:hover {
+    background: #357ABD;
+}
+
+/* 📤 Botón de exportar */
+.export-btn {
+    background: #4D96FF;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background 0.3s;
+}
+
+.export-btn:hover {
+    background: #357ABD;
+}
+
+
+/* 🎨 Diseño de cada gráfico */
+.chart-box {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 100%;
+    max-width: 600px;
+}
+
+.top-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+  }
+  
+
+/* 📱 Responsive para pantallas pequeñas */
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+    gap: 20px;
+    width: 100%;
+    margin: 0 auto;          /* Centra horizontalmente */
+    justify-content: center; /* Opcional, si quieres centrar el contenido dentro del grid */
+  }
+  
+  @media (max-width: 768px) {
+    .charts-container {
+      grid-template-columns: 1fr; /* 1 columna en pantallas pequeñas */
+    }
+  }
+  
+  
