@@ -52,7 +52,9 @@ export default async function handler(req, res) {
     // Procesar datos del POST
     try {
       // En Vercel, req.body llega como string; parseamos manualmente:
-      const data = JSON.parse(req.body);
+      const data = req.body;
+      console.log("Datos recibidos:", data);
+
 
       // Validar datos
       if (
