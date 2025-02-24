@@ -24,7 +24,7 @@ async function connectToDatabase() {
   });
 
   await client.connect();
-  const db = client.db(); // Si en tu URI no especificaste el nombre de la DB, pon db("miBase")
+  const db = client.db("AH_dashboard"); // Si en tu URI no especificaste el nombre de la DB, pon db("miBase")
   cachedDb = db;
   return db;
 }
