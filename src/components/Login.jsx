@@ -19,7 +19,7 @@ function Login() {
 
     // Configuración del enlace
     const actionCodeSettings = {
-      url: "url: https://proyecto-dash.vercel.app/dashboard";, // Ajusta el puerto si es distinto
+      url: "https://proyecto-dash.vercel.app/dashboard",
       handleCodeInApp: true
     };
 
