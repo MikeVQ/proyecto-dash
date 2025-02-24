@@ -46,7 +46,7 @@ export default async function handler(req, res) {
 
   // Conectar a la base de datos
   const db = await connectToDatabase();
-  const collection = db.collection("evento"); // Nombre de la colección
+  const collection = db.collection("eventos"); // Nombre de la colección
 
   if (req.method === "POST") {
     // Procesar datos del POST
