@@ -19,7 +19,7 @@ function Login() {
 
     // Configuración del enlace
     const actionCodeSettings = {
-      url: "https://adriana-hoyos-login.vercel.app/dashboard", // Ajusta el puerto si es distinto
+      url: "url: https://proyecto-dash.vercel.app/dashboard";, // Ajusta el puerto si es distinto
       handleCodeInApp: true
     };
 
