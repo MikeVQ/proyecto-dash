@@ -226,7 +226,7 @@ const Dashboard = () => {
 
         {/* NUEVO BOTÓN para ir a la página de asignar usuarios */}
         <button
-          onClick={() => navigate("/usuarios-asesor")}
+          onClick={() => navigate("/usuario-asesor")}
           className="add-asesor-btn"
         >
           👥 Asignar Usuarios
