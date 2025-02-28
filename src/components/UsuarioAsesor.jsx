@@ -6,7 +6,7 @@ import "./UsuarioAsesor.css"; // <-- Importa tu hoja de estilos
 
 const UsuariosAsesor = () => {
   const [asesores, setAsesores] = useState([]);
-  const [selectedAsesorId, setSelectedAsesorId] = useState("");
+  const [selectedAsesor, setSelectedAsesor] = useState(""); // Ahora almacena el nombre
   const [usuarios, setUsuarios] = useState([]);
 
   // Campos para crear usuario
@@ -25,24 +25,24 @@ const UsuariosAsesor = () => {
 
   // 2. Listar usuarios de un asesor
   const handleListarUsuarios = () => {
-    if (!selectedAsesorId) return;
-    axios.get(`/api/usuariosAsesor?asesorId=${selectedAsesorId}`)
+    if (!selectedAsesor) return;
+    axios.get(`/api/usuariosAsesor?nombre_asesor=${encodeURIComponent(selectedAsesor)}`)
       .then(res => setUsuarios(res.data))
       .catch(err => console.error("Error:", err));
   };
 
   // 3. Crear usuario
   const handleCrearUsuario = () => {
-    if (!selectedAsesorId) {
+    if (!selectedAsesor) {
       setMessage("Selecciona un asesor primero.");
       return;
     }
     axios.post("/api/usuariosAsesor", {
-      asesorId: selectedAsesorId,
+      nombre_asesor: selectedAsesor, // Usamos el nombre en vez del ID
       nombre_usuario: nombreUsuario,
       email_usuario: emailUsuario,
-      pais_origen: pais,
-      bussines_type: tipoNegocio
+      pais: pais, // Corrección del campo
+      tipo_negocio: tipoNegocio // Corrección del campo
     })
       .then(() => {
         setMessage("Usuario creado con éxito.");
@@ -63,7 +63,7 @@ const UsuariosAsesor = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!selectedAsesorId) {
+    if (!selectedAsesor) {
       setMessage("Selecciona un asesor antes de subir Excel.");
       return;
     }
@@ -77,11 +77,11 @@ const UsuariosAsesor = () => {
       // Opción A: Hacer un POST por cada fila
       for (const row of rows) {
         await axios.post("/api/usuariosAsesor", {
-          asesorId: selectedAsesorId,
+          nombre_asesor: selectedAsesor, // Usamos el nombre
           nombre_usuario: row.nombre_usuario,
           email_usuario: row.email_usuario,
-          pais_origen: row.pais_origen,
-          bussines_type: row.bussines_type
+          pais: row.pais, // Corrección del campo
+          tipo_negocio: row.tipo_negocio // Corrección del campo
         });
       }
 
@@ -102,12 +102,12 @@ const UsuariosAsesor = () => {
       <div className="usuarios-asesor-select-row">
         <select
           className="usuarios-asesor-select"
-          value={selectedAsesorId}
-          onChange={(e) => setSelectedAsesorId(e.target.value)}
+          value={selectedAsesor}
+          onChange={(e) => setSelectedAsesor(e.target.value)}
         >
           <option value="">Selecciona un asesor</option>
           {asesores.map(asesor => (
-            <option key={asesor._id} value={asesor._id}>
+            <option key={asesor._id} value={asesor.nombre_asesor}>
               {asesor.nombre_asesor}
             </option>
           ))}
@@ -185,8 +185,8 @@ const UsuariosAsesor = () => {
             <tr key={u._id}>
               <td>{u.nombre_usuario}</td>
               <td>{u.email_usuario}</td>
-              <td>{u.pais_origen}</td>
-              <td>{u.bussines_type}</td>
+              <td>{u.pais}</td> {/* Corregido */}
+              <td>{u.tipo_negocio}</td> {/* Corregido */}
             </tr>
           ))}
         </tbody>

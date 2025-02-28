@@ -1,52 +1,53 @@
 /* Contenedor principal: caja blanca, centrada, con sombra */
 .usuarios-asesor-container {
-    max-width: 900px;                      /* Ancho máximo */
-    margin: 40px auto;                     /* Centra horizontalmente */
-    background-color: #fff;                /* Fondo blanco */
-    color: #000;                           /* Texto negro */
-    border-radius: 8px;                    /* Bordes redondeados */
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    max-width: 900px;
+    margin: 40px auto;
+    background-color: #fff;
+    color: #000;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
-  }
-  
-  /* Título */
-  .usuarios-asesor-title {
+}
+
+/* Título */
+.usuarios-asesor-title {
     text-align: center;
     margin-bottom: 20px;
     font-size: 1.8rem;
     color: #333;
-  }
-  
-  /* Mensaje (error o éxito) */
-  .usuarios-asesor-message {
+}
+
+/* Mensaje de error o éxito */
+.usuarios-asesor-message {
     background-color: #fce4ec; /* Fondo rosado claro */
-    color: #d32f2f;            /* Texto rojo */
+    color: #d32f2f; /* Texto rojo */
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 20px;
-    text-align: center;        /* Centrado */
-  }
-  
-  /* Fila para select + botón */
-  .usuarios-asesor-select-row {
+    text-align: center;
+}
+
+/* Fila para select + botón */
+.usuarios-asesor-select-row {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 20px;
-  }
-  
-  /* Estilo para el select */
-  .usuarios-asesor-select {
+}
+
+/* Estilo para el select */
+.usuarios-asesor-select {
     padding: 8px;
     border-radius: 6px;
     border: 1px solid #ccc;
     min-width: 200px;
-    background-color: #fff;
-    color: #000;
-  }
-  
-  /* Botones generales */
-  .usuarios-asesor-button {
+    background-color: #fff !important; /* Asegura que el fondo sea blanco */
+    color: #000 !important; /* Asegura que el texto sea negro */
+    font-size: 1rem;
+}
+
+/* Botones generales */
+.usuarios-asesor-button {
     background: #4d96ff;
     color: #fff;
     padding: 10px 16px;
@@ -55,57 +56,93 @@
     cursor: pointer;
     font-weight: bold;
     transition: background 0.3s;
-  }
-  
-  .usuarios-asesor-button:hover {
+}
+
+.usuarios-asesor-button:hover {
     background: #357abd;
-  }
-  
-  /* Formulario para crear usuario */
-  .usuarios-asesor-form {
+}
+
+/* Formulario para crear usuario */
+.usuarios-asesor-form {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 20px;
-  }
-  
-  /* Inputs del formulario */
-  .usuarios-asesor-input {
-    padding: 8px;
+}
+
+/* Inputs del formulario */
+.usuarios-asesor-input {
+    padding: 10px;
     border-radius: 6px;
     border: 1px solid #ccc;
     flex: 1 1 200px;
+    background-color: #fff !important; /* Fondo blanco */
+    color: #000 !important; /* Texto negro */
+    font-size: 1rem;
+}
+
+/* Asegura que los inputs no se oscurezcan en modo oscuro */
+.usuarios-asesor-input:focus {
     background-color: #fff;
     color: #000;
-  }
-  
-  /* Contenedor de carga masiva */
-  .usuarios-asesor-mass-upload {
+    border-color: #4d96ff;
+    outline: none;
+}
+
+/* Placeholder más visible */
+.usuarios-asesor-input::placeholder {
+    color: #777 !important; /* Un gris más claro para mayor legibilidad */
+}
+
+/* Contenedor de carga masiva */
+.usuarios-asesor-mass-upload {
     margin-bottom: 20px;
-  }
-  
-  /* Input para subir archivo */
-  .usuarios-asesor-file {
+}
+
+/* Input para subir archivo */
+.usuarios-asesor-file {
     margin-top: 10px;
-  }
-  
-  /* Tabla de usuarios */
-  .usuarios-asesor-table {
+}
+
+/* Tabla de usuarios */
+.usuarios-asesor-table {
     width: 100%;
     border-collapse: collapse;
     background-color: #fff;
-  }
-  
-  .usuarios-asesor-table th,
-  .usuarios-asesor-table td {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.usuarios-asesor-table th,
+.usuarios-asesor-table td {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #ddd;
-  }
-  
-  /* Encabezado de la tabla */
-  .usuarios-asesor-table th {
+}
+
+/* Encabezado de la tabla */
+.usuarios-asesor-table th {
     background-color: #4d96ff;
     color: #fff;
-  }
-  
+}
+
+/* Filas alternas para mayor claridad */
+.usuarios-asesor-table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+/* Asegurar que las filas tengan buena separación */
+.usuarios-asesor-table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+/* Ajustar el tamaño de los inputs en pantallas pequeñas */
+@media (max-width: 768px) {
+    .usuarios-asesor-form {
+        flex-direction: column;
+    }
+    
+    .usuarios-asesor-input {
+        width: 100%;
+    }
+}
