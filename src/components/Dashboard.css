@@ -14,7 +14,23 @@ body {
     margin: 20px auto;
     padding: 20px;
 }
-
+.add-asesor-btn {
+    background: #6BCB77;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+    margin-bottom: 20px;
+    /* Puedes ajustar el margen, por ejemplo, margin: 0 10px 20px 0; */
+  }
+  
+  .add-asesor-btn:hover {
+    background: #57a765;
+  }
+  
 /* 🎯 Título del Dashboard */
 .dashboard-title {
     font-size: 2.5rem;

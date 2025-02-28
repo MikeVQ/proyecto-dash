@@ -11,20 +11,18 @@ async function connectToDatabase() {
     return cachedDb;
   }
 
-  // Lee la URI desde variables de entorno
   const uri = process.env.MONGO_URI;
   if (!uri) {
     throw new Error("❌ No se definió la variable MONGO_URI en el entorno.");
   }
 
   const client = new MongoClient(uri, {
-    // Opcional: Configuraciones para evitar warnings
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
 
   await client.connect();
-  const db = client.db("AH_dashboard");
+  const db = client.db("AH_dashboard"); // Ajusta el nombre si tu DB se llama distinto
   cachedDb = db;
   return db;
 }
@@ -46,21 +44,31 @@ export default async function handler(req, res) {
 
   // Conectar a la base de datos
   const db = await connectToDatabase();
-  const collection = db.collection("eventos"); // Nombre de la colección
+  const collection = db.collection("eventos");
 
   if (req.method === "POST") {
-    // Procesar datos del POST
     try {
-      // En Vercel, req.body llega como string; parseamos manualmente:
+      // En Vercel, req.body suele llegar como objeto si tu configuración de bodyParser está activa.
+      // Si ves "[object Object] is not valid JSON", elimina el JSON.parse() o revisa la config.
       const data = req.body;
       console.log("Datos recibidos:", data);
 
-      // 1. Verificamos que las seis claves existan (no sean undefined)
+      // 1. Verificar que existan todas las claves obligatorias
+      //    (observaciones es opcional)
       if (
         typeof data.idUsuario === "undefined" ||
         typeof data.emailUsuario === "undefined" ||
+        typeof data.nombreUsuario === "undefined" ||
         typeof data.urlActual === "undefined" ||
-        typeof data.linkUrl === "undefined" ||
+        typeof data.urlLink === "undefined" ||
+        typeof data.fecha === "undefined" ||
+        typeof data.emailAsesor === "undefined" ||
+        typeof data.asesor === "undefined" ||
+        typeof data.origenAsesor === "undefined" ||
+        typeof data.tipoNegocioAsesor === "undefined" ||
+        typeof data.fechaNotificacion === "undefined" ||
+        typeof data.mailEnviado === "undefined" ||
+        typeof data.horaNotificacion === "undefined" ||
         typeof data.nombreProducto === "undefined" ||
         typeof data.skuProducto === "undefined"
       ) {
@@ -69,35 +77,59 @@ export default async function handler(req, res) {
           .json({ error: "❌ Error: Faltan claves en la petición" });
       }
 
-      // 2. Exigir que datos no esten vacios y validar datos
+      // 2. Validar que los campos obligatorios no vengan vacíos (salvo mailEnviado si es boolean false)
+      //    mailEnviado es boolean: si lo hacemos con "!data.mailEnviado" invalidaría "false".
+      //    Observaciones es opcional, así que no la chequeamos aquí.
       if (
         !data.idUsuario ||
         !data.emailUsuario ||
+        !data.nombreUsuario ||
         !data.urlActual ||
-       // !data.linkUrl ||   QUITAR LOS // CUANDO ESTE ACTIVO
-        !data.nombreProducto 
-       // !data.skuProducto
+        !data.urlLink ||
+        !data.fecha ||
+        !data.emailAsesor ||
+        !data.asesor ||
+        !data.origenAsesor ||
+        !data.tipoNegocioAsesor ||
+        !data.fechaNotificacion ||
+        !data.horaNotificacion ||
+        !data.nombreProducto ||
+        !data.skuProducto
       ) {
         return res
           .status(400)
           .json({ error: "❌ Error: Faltan datos en la petición" });
       }
 
-      // 3. linkUrl y skuProducto pueden ser null o "", lo aceptamos.
-      //    Si vienen vacíos, los guardamos como null en MongoDB.
-      const linkUrl = data.linkUrl ? data.linkUrl : null;
-      const skuProducto = data.skuProducto ? data.skuProducto : null;
-      
+      // mailEnviado debe ser boolean (true/false)
+      if (typeof data.mailEnviado !== "boolean") {
+        return res
+          .status(400)
+          .json({ error: "❌ Error: 'mailEnviado' debe ser boolean (true/false)" });
+      }
+
+      // 3. observaciones es opcional, si no viene la guardamos como null
+      const observaciones = data.observaciones ? data.observaciones : null;
 
       // Insertar en la colección
+      // Guardamos los campos con nombres en snake_case
       await collection.insertOne({
         id_usuario: data.idUsuario,
         email_usuario: data.emailUsuario,
+        nombre_usuario: data.nombreUsuario,
         url_actual: data.urlActual,
-        link_url: data.linkUrl,
+        url_link: data.urlLink,
+        fecha: data.fecha,
+        email_asesor: data.emailAsesor,
+        asesor: data.asesor,
+        origen_asesor: data.origenAsesor,
+        tipo_negocio_asesor: data.tipoNegocioAsesor,
+        fecha_notificacion: data.fechaNotificacion,
+        mail_enviado: data.mailEnviado,
+        observaciones: observaciones,
+        hora_notificacion: data.horaNotificacion,
         nombre_producto: data.nombreProducto,
-        sku_producto: data.skuProducto,
-        fecha: new Date(), // Fecha de insercion
+        sku_producto: data.skuProducto
       });
 
       return res.status(200).json({ success: "✅ Datos guardados con éxito" });
@@ -112,7 +144,7 @@ export default async function handler(req, res) {
     try {
       const eventos = await collection
         .find({})
-        .sort({ fecha: -1 }) // Orden DESC por fecha
+        .sort({ fecha: -1 })
         .toArray();
 
       return res.status(200).json(eventos);
