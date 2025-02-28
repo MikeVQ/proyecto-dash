@@ -1,10 +1,17 @@
-/* Contenedor principal */
+/* Contenedor principal: caja blanca, centrada, con sombra */
 .usuarios-asesor-container {
+    max-width: 900px;                      /* Ancho máximo */
+    margin: 40px auto;                     /* Centra horizontalmente */
+    background-color: #fff;                /* Fondo blanco */
+    color: #000;                           /* Texto negro */
+    border-radius: 8px;                    /* Bordes redondeados */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Sombra sutil */
     padding: 20px;
   }
   
   /* Título */
   .usuarios-asesor-title {
+    text-align: center;
     margin-bottom: 20px;
     font-size: 1.8rem;
     color: #333;
@@ -12,11 +19,12 @@
   
   /* Mensaje (error o éxito) */
   .usuarios-asesor-message {
-    background-color: #fce4ec; /* Fondo rosado claro (puedes cambiarlo) */
+    background-color: #fce4ec; /* Fondo rosado claro */
     color: #d32f2f;            /* Texto rojo */
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 20px;
+    text-align: center;        /* Centrado */
   }
   
   /* Fila para select + botón */
@@ -33,6 +41,8 @@
     border-radius: 6px;
     border: 1px solid #ccc;
     min-width: 200px;
+    background-color: #fff;
+    color: #000;
   }
   
   /* Botones generales */
@@ -65,6 +75,8 @@
     border-radius: 6px;
     border: 1px solid #ccc;
     flex: 1 1 200px;
+    background-color: #fff;
+    color: #000;
   }
   
   /* Contenedor de carga masiva */
