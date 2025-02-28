@@ -15,9 +15,24 @@ function Login() {
     "mauro@sanmiguel.io"
   ];
 
+  // Lista de correos permitidos
+  const allowedEmails = [
+    "mdvelascoc@outlook.com",
+    "carboleda@adrianahoyos.com",
+    "mauro@sanmiguel.io"
+  ];
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // Normalizamos el correo (quitamos espacios y lo pasamos a minúsculas)
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Validar si el correo está en la lista de permitidos
+    if (!allowedEmails.includes(normalizedEmail)) {
+      setMessage(
+        "Correo inválido. Solo se permiten:\n" + allowedEmails.join(", ")
+      );
     // Normalizamos el correo (quitamos espacios y lo pasamos a minúsculas)
     const normalizedEmail = email.trim().toLowerCase();
 
@@ -30,14 +45,20 @@ function Login() {
     }
 
     // Configuración del enlace (Magic Link)
+    // Configuración del enlace (Magic Link)
     const actionCodeSettings = {
+      url: "https://proyecto-dash.vercel.app/dashboard", // Ajusta la ruta si es necesario
       url: "https://proyecto-dash.vercel.app/dashboard", // Ajusta la ruta si es necesario
       handleCodeInApp: true
     };
 
     // Enviar Magic Link
     sendSignInLinkToEmail(auth, normalizedEmail, actionCodeSettings)
+    sendSignInLinkToEmail(auth, normalizedEmail, actionCodeSettings)
       .then(() => {
+        window.localStorage.setItem("emailForSignIn", normalizedEmail);
+        setMessage(`Se envió un correo de verificación a ${normalizedEmail}.
+Por favor revisa tu bandeja de entrada.
         window.localStorage.setItem("emailForSignIn", normalizedEmail);
         setMessage(`Se envió un correo de verificación a ${normalizedEmail}.
 Por favor revisa tu bandeja de entrada.
@@ -72,3 +93,4 @@ OJO: El correo puede estar archivado como no deseado.`);
 }
 
 export default Login;
+
