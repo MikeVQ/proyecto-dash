@@ -239,26 +239,22 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      
-        {/* NUEVO BOTÓN PARA IR A LA PÁGINA ASESOR */}
+
+       {/* BOTONES CENTRADOS BAJO LAS TARJETAS */}
+       <div className="dashboard-buttons-container">
         <button
           onClick={() => navigate("/asesor")}
           className="add-asesor-btn"
         >
           ➕ Agregar Asesor
         </button>
-        {/* FIN DEL NUEVO BOTÓN */}
-
-        {/* NUEVO BOTÓN para ir a la página de asignar usuarios */}
         <button
           onClick={() => navigate("/usuario-asesor")}
           className="add-asesor-btn"
         >
           👥 Asignar Usuarios
         </button>
-
-        {/* ... El resto de tu contenido (search bar, stats, etc.) ... */}
-
+      </div>
 
       <div className="content-container">
         {/* Tabla y filtros */}
