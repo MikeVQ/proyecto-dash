@@ -14,23 +14,7 @@ body {
     margin: 20px auto;
     padding: 20px;
 }
-.add-asesor-btn {
-    background: #6BCB77;
-    color: white;
-    padding: 10px 16px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s;
-    margin-bottom: 20px;
-    /* Puedes ajustar el margen, por ejemplo, margin: 0 10px 20px 0; */
-  }
-  
-  .add-asesor-btn:hover {
-    background: #57a765;
-  }
-  
+
 /* 🎯 Título del Dashboard */
 .dashboard-title {
     font-size: 2.5rem;
@@ -85,6 +69,32 @@ body {
     cursor: pointer;
 }
 
+/* NUEVO: Contenedor para los botones (Agregar Asesor / Asignar Usuarios) */
+.dashboard-buttons-container {
+    display: flex;           /* Ponemos los botones en fila */
+    justify-content: center; /* Centra horizontalmente */
+    gap: 20px;               /* Espacio entre ellos */
+    margin-bottom: 20px;     /* Separación con lo que sigue */
+}
+
+/* Botón reutilizable (verde) */
+.add-asesor-btn {
+    background: #6BCB77;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+    /* Eliminamos margin-bottom aquí para que no se distorsione en el contenedor */
+    margin: 0;
+}
+
+.add-asesor-btn:hover {
+    background: #57a765;
+}
+
 /* 📌 Contenedor flexible para tabla y gráficos */
 .content-container {
     display: flex;
@@ -125,6 +135,7 @@ body {
 .dashboard-table tr:nth-child(even) {
     background: #f2f2f2;
 }
+
 /* 🎛 Contenedor de filtros */
 .filter-container {
     display: flex;
@@ -134,7 +145,8 @@ body {
 }
 
 /* 📅 Estilos para select y date picker */
-.filter-select, .date-picker {
+.filter-select,
+.date-picker {
     padding: 8px;
     border: 2px solid #4D96FF;
     border-radius: 8px;
@@ -144,7 +156,8 @@ body {
     transition: all 0.3s ease-in-out;
 }
 
-.filter-select:focus, .date-picker:focus {
+.filter-select:focus,
+.date-picker:focus {
     outline: none;
     border-color: #357ABD;
 }
@@ -180,7 +193,6 @@ body {
     background: #357ABD;
 }
 
-
 /* 🎨 Diseño de cada gráfico */
 .chart-box {
     background: white;
@@ -198,8 +210,7 @@ body {
     align-items: center;
     flex-wrap: wrap;
     margin-bottom: 15px;
-  }
-  
+}
 
 /* 📱 Responsive para pantallas pequeñas */
 .charts-container {
@@ -209,12 +220,10 @@ body {
     width: 100%;
     margin: 0 auto;          /* Centra horizontalmente */
     justify-content: center; /* Opcional, si quieres centrar el contenido dentro del grid */
-  }
-  
-  @media (max-width: 768px) {
+}
+
+@media (max-width: 768px) {
     .charts-container {
-      grid-template-columns: 1fr; /* 1 columna en pantallas pequeñas */
+        grid-template-columns: 1fr; /* 1 columna en pantallas pequeñas */
     }
-  }
-  
-  
+}

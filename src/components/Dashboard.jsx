@@ -215,25 +215,6 @@ const Dashboard = () => {
       <div className="header-container">
         <h1 className="dashboard-title">📊 Dashboard de Descargas</h1>
 
-        {/* NUEVO BOTÓN PARA IR A LA PÁGINA ASESOR */}
-        <button
-          onClick={() => navigate("/asesor")}
-          className="add-asesor-btn"
-        >
-          ➕ Agregar Asesor
-        </button>
-        {/* FIN DEL NUEVO BOTÓN */}
-
-        {/* NUEVO BOTÓN para ir a la página de asignar usuarios */}
-        <button
-          onClick={() => navigate("/usuario-asesor")}
-          className="add-asesor-btn"
-        >
-          👥 Asignar Usuarios
-        </button>
-
-        {/* ... El resto de tu contenido (search bar, stats, etc.) ... */}
-
         <input
           type="text"
           className="search-bar"
@@ -258,6 +239,26 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      
+        {/* NUEVO BOTÓN PARA IR A LA PÁGINA ASESOR */}
+        <button
+          onClick={() => navigate("/asesor")}
+          className="add-asesor-btn"
+        >
+          ➕ Agregar Asesor
+        </button>
+        {/* FIN DEL NUEVO BOTÓN */}
+
+        {/* NUEVO BOTÓN para ir a la página de asignar usuarios */}
+        <button
+          onClick={() => navigate("/usuario-asesor")}
+          className="add-asesor-btn"
+        >
+          👥 Asignar Usuarios
+        </button>
+
+        {/* ... El resto de tu contenido (search bar, stats, etc.) ... */}
+
 
       <div className="content-container">
         {/* Tabla y filtros */}
