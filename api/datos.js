@@ -24,7 +24,7 @@ async function connectToDatabase() {
   });
 
   await client.connect();
-  const db = client.db(); // Si en tu URI no especificaste el nombre de la DB, pon db("miBase")
+  const db = client.db("AH_dashboard");
   cachedDb = db;
   return db;
 }
@@ -52,21 +52,42 @@ export default async function handler(req, res) {
     // Procesar datos del POST
     try {
       // En Vercel, req.body llega como string; parseamos manualmente:
-      const data = JSON.parse(req.body);
+      const data = req.body;
+      console.log("Datos recibidos:", data);
 
-      // Validar datos
+      // 1. Verificamos que las seis claves existan (no sean undefined)
+      if (
+        typeof data.idUsuario === "undefined" ||
+        typeof data.emailUsuario === "undefined" ||
+        typeof data.urlActual === "undefined" ||
+        typeof data.linkUrl === "undefined" ||
+        typeof data.nombreProducto === "undefined" ||
+        typeof data.skuProducto === "undefined"
+      ) {
+        return res
+          .status(400)
+          .json({ error: "❌ Error: Faltan claves en la petición" });
+      }
+
+      // 2. Exigir que datos no esten vacios y validar datos
       if (
         !data.idUsuario ||
         !data.emailUsuario ||
         !data.urlActual ||
-        !data.linkUrl ||
-        !data.nombreProducto ||
-        !data.skuProducto
+       // !data.linkUrl ||   QUITAR LOS // CUANDO ESTE ACTIVO
+        !data.nombreProducto 
+       // !data.skuProducto
       ) {
         return res
           .status(400)
           .json({ error: "❌ Error: Faltan datos en la petición" });
       }
+
+      // 3. linkUrl y skuProducto pueden ser null o "", lo aceptamos.
+      //    Si vienen vacíos, los guardamos como null en MongoDB.
+      const linkUrl = data.linkUrl ? data.linkUrl : null;
+      const skuProducto = data.skuProducto ? data.skuProducto : null;
+      
 
       // Insertar en la colección
       await collection.insertOne({
@@ -76,7 +97,7 @@ export default async function handler(req, res) {
         link_url: data.linkUrl,
         nombre_producto: data.nombreProducto,
         sku_producto: data.skuProducto,
-        fecha: new Date(), // Reemplaza NOW() de MySQL
+        fecha: new Date(), // Fecha de insercion
       });
 
       return res.status(200).json({ success: "✅ Datos guardados con éxito" });

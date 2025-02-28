@@ -8,27 +8,39 @@ function Login() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
 
+  // Lista de correos permitidos
+  const allowedEmails = [
+    "mdvelascoc@outlook.com",
+    "carboleda@adrianahoyos.com",
+    "mauro@sanmiguel.io"
+  ];
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Validar correo exacto
-    if (email.trim().toLowerCase() !== "mdvelascoc@outlook.com") {
-      setMessage("Correo inválido. Solo se permite 'mdvelascoc@outlook.com'.");
+    // Normalizamos el correo (quitamos espacios y lo pasamos a minúsculas)
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Validar si el correo está en la lista de permitidos
+    if (!allowedEmails.includes(normalizedEmail)) {
+      setMessage(
+        "Correo inválido. Solo se permiten:\n" + allowedEmails.join(", ")
+      );
       return;
     }
 
-    // Configuración del enlace
+    // Configuración del enlace (Magic Link)
     const actionCodeSettings = {
-      url: "https://adriana-hoyos-login.vercel.app/dashboard", // Ajusta el puerto si es distinto
+      url: "https://proyecto-dash.vercel.app/dashboard", // Ajusta la ruta si es necesario
       handleCodeInApp: true
     };
 
     // Enviar Magic Link
-    sendSignInLinkToEmail(auth, email, actionCodeSettings)
+    sendSignInLinkToEmail(auth, normalizedEmail, actionCodeSettings)
       .then(() => {
-        window.localStorage.setItem("emailForSignIn", email);
-        setMessage(`Se envió un correo de verificación a ${email}. 
-Por favor revisa tu bandeja de entrada. 
+        window.localStorage.setItem("emailForSignIn", normalizedEmail);
+        setMessage(`Se envió un correo de verificación a ${normalizedEmail}.
+Por favor revisa tu bandeja de entrada.
 OJO: El correo puede estar archivado como no deseado.`);
       })
       .catch((error) => {

@@ -90,7 +90,7 @@ const Dashboard = () => {
   // -----------------------------------------------
   useEffect(() => {
     axios
-      .get(import.meta.env.VITE_API_URL)
+      .get("/api/datos")
       .then((response) => {
         if (Array.isArray(response.data)) {
           setData(response.data);
