@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import * as XLSX from "xlsx";
 import "./Dashboard.css";
+import { useNavigate } from "react-router-dom";
 
 // Importaciones de Firebase
 import {
@@ -213,7 +214,7 @@ const Dashboard = () => {
     <div className="dashboard-container">
       <div className="header-container">
         <h1 className="dashboard-title">📊 Dashboard de Descargas</h1>
-        
+
         {/* NUEVO BOTÓN PARA IR A LA PÁGINA ASESOR */}
         <button
           onClick={() => navigate("/asesor")}
@@ -222,6 +223,16 @@ const Dashboard = () => {
           ➕ Agregar Asesor
         </button>
         {/* FIN DEL NUEVO BOTÓN */}
+
+        {/* NUEVO BOTÓN para ir a la página de asignar usuarios */}
+        <button
+          onClick={() => navigate("/usuarios-asesor")}
+          className="add-asesor-btn"
+        >
+          👥 Asignar Usuarios
+        </button>
+
+        {/* ... El resto de tu contenido (search bar, stats, etc.) ... */}
 
         <input
           type="text"

@@ -1,0 +1,99 @@
+/* Contenedor principal */
+.usuarios-asesor-container {
+    padding: 20px;
+  }
+  
+  /* Título */
+  .usuarios-asesor-title {
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    color: #333;
+  }
+  
+  /* Mensaje (error o éxito) */
+  .usuarios-asesor-message {
+    background-color: #fce4ec; /* Fondo rosado claro (puedes cambiarlo) */
+    color: #d32f2f;            /* Texto rojo */
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  
+  /* Fila para select + botón */
+  .usuarios-asesor-select-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  /* Estilo para el select */
+  .usuarios-asesor-select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    min-width: 200px;
+  }
+  
+  /* Botones generales */
+  .usuarios-asesor-button {
+    background: #4d96ff;
+    color: #fff;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+  }
+  
+  .usuarios-asesor-button:hover {
+    background: #357abd;
+  }
+  
+  /* Formulario para crear usuario */
+  .usuarios-asesor-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  /* Inputs del formulario */
+  .usuarios-asesor-input {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    flex: 1 1 200px;
+  }
+  
+  /* Contenedor de carga masiva */
+  .usuarios-asesor-mass-upload {
+    margin-bottom: 20px;
+  }
+  
+  /* Input para subir archivo */
+  .usuarios-asesor-file {
+    margin-top: 10px;
+  }
+  
+  /* Tabla de usuarios */
+  .usuarios-asesor-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+  }
+  
+  .usuarios-asesor-table th,
+  .usuarios-asesor-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  /* Encabezado de la tabla */
+  .usuarios-asesor-table th {
+    background-color: #4d96ff;
+    color: #fff;
+  }
+  
