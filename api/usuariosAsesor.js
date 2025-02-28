@@ -1,6 +1,5 @@
 // /api/usuariosAsesor.js
-import { connectToDatabase } from "../../_dbConnection.js";
-import { ObjectId } from "mongodb";
+import { connectToDatabase } from "./_dbConnection.js";
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
