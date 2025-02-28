@@ -13,7 +13,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/asesor" element={<Asesor />} />
-        <Route path="/usuarios-asesor" element={<UsuariosAsesor />} /> 
+        <Route path="/usuarios-asesor" element={<UsuarioAsesor />} /> 
         {/* ^^^ Nueva ruta */}
       </Routes>
     </Router>
