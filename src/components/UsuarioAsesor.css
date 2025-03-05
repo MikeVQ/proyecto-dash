@@ -118,6 +118,25 @@
     overflow: hidden;
 }
 
+.message-success {
+    background-color: #e0f8e9; /* Fondo verde claro */
+    color: green;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .message-error {
+    background-color: #fce4ec; /* Fondo rosado claro */
+    color: red;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+
 /* Modal overlay para centrar el pop up con fondo semitransparente */
 .modal-overlay {
     position: fixed;

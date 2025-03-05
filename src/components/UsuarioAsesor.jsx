@@ -19,6 +19,7 @@ const UsuariosAsesor = () => {
   const [pais, setPais] = useState("");
   const [tipoNegocio, setTipoNegocio] = useState("");
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // 'success' o 'error'
 
   // Estado para el modo edición
   const [editingUser, setEditingUser] = useState(null);
@@ -50,6 +51,7 @@ const UsuariosAsesor = () => {
   const handleCrearUsuario = () => {
     if (!selectedAsesor) {
       setMessage("Selecciona un asesor primero.");
+      setMessageType("error");
       return;
     }
     axios.post("/api/usuariosAsesor", {
@@ -61,6 +63,7 @@ const UsuariosAsesor = () => {
     })
       .then(() => {
         setMessage("Usuario creado con éxito.");
+        setMessageType("success");
         // Limpiar campos
         setNombreUsuario("");
         setEmailUsuario("");
@@ -71,13 +74,13 @@ const UsuariosAsesor = () => {
       .catch(err => {
         console.error("Error al crear usuario:", err);
         setMessage("Ocurrió un error al crear el usuario.");
+        setMessageType("error");
       });
   };
 
   // 3.b Función para actualizar usuario (modo edición)
   const handleUpdateUsuario = async () => {
     try {
-      // Se asume que existe un endpoint PUT para actualizar el usuario
       await axios.put("/api/usuariosAsesor", {
         _id: editingUser._id,
         nombre_asesor: selectedAsesor,
@@ -87,6 +90,7 @@ const UsuariosAsesor = () => {
         tipo_negocio: tipoNegocio
       });
       setMessage("Usuario actualizado con éxito.");
+      setMessageType("success");
       setEditingUser(null);
       setNombreUsuario("");
       setEmailUsuario("");
@@ -96,6 +100,7 @@ const UsuariosAsesor = () => {
     } catch (error) {
       console.error("Error al actualizar usuario:", error);
       setMessage("Ocurrió un error al actualizar el usuario.");
+      setMessageType("error");
     }
   };
 
@@ -106,6 +111,7 @@ const UsuariosAsesor = () => {
 
     if (!selectedAsesor) {
       setMessage("Selecciona un asesor antes de subir Excel.");
+      setMessageType("error");
       return;
     }
 
@@ -115,7 +121,6 @@ const UsuariosAsesor = () => {
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(worksheet);
 
-      // Opción: Hacer un POST por cada fila
       for (const row of rows) {
         await axios.post("/api/usuariosAsesor", {
           nombre_asesor: selectedAsesor,
@@ -127,17 +132,18 @@ const UsuariosAsesor = () => {
       }
 
       setMessage("Usuarios cargados exitosamente desde Excel.");
+      setMessageType("success");
       handleListarUsuarios();
     } catch (error) {
       console.error("Error leyendo archivo Excel:", error);
       setMessage("Error al procesar el archivo Excel.");
+      setMessageType("error");
     }
   };
 
   // 5. Descargar formato para carga masiva
   const handleDescargarFormato = () => {
     const headers = ['nombre_usuario', 'email_usuario', 'pais', 'tipo_negocio'];
-    // Se crea una hoja con solo la fila de encabezados
     const ws = XLSX.utils.aoa_to_sheet([headers]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Formato");
@@ -148,6 +154,7 @@ const UsuariosAsesor = () => {
   const handleHistoricoUsuarios = () => {
     if (!selectedAsesor) {
       setMessage("Selecciona un asesor primero.");
+      setMessageType("error");
       return;
     }
     axios.get(`/api/historicoUsuarios?nombre_asesor=${encodeURIComponent(selectedAsesor)}`)
@@ -158,6 +165,7 @@ const UsuariosAsesor = () => {
       .catch(err => {
         console.error("Error al obtener histórico:", err);
         setMessage("Ocurrió un error al obtener el histórico.");
+        setMessageType("error");
       });
   };
 
@@ -186,11 +194,13 @@ const UsuariosAsesor = () => {
     try {
       await axios.delete(`/api/usuariosAsesor?_id=${deleteUserId}`);
       setMessage("Usuario eliminado correctamente.");
+      setMessageType("success");
       setDeleteModalVisible(false);
       handleListarUsuarios();
     } catch (error) {
       console.error("Error al eliminar usuario:", error);
       setMessage("Error al eliminar usuario.");
+      setMessageType("error");
       setDeleteModalVisible(false);
     }
   };
@@ -204,7 +214,11 @@ const UsuariosAsesor = () => {
   return (
     <div className="usuarios-asesor-container">
       <h2 className="usuarios-asesor-title">Asignar Usuarios a Asesor</h2>
-      {message && <p className="usuarios-asesor-message">{message}</p>}
+      {message && (
+        <p className={`usuarios-asesor-message ${messageType === "success" ? "message-success" : messageType === "error" ? "message-error" : ""}`}>
+          {message}
+        </p>
+      )}
 
       {/* Seleccionar asesor */}
       <div className="usuarios-asesor-select-row">
