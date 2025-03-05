@@ -1,4 +1,3 @@
-// UsuariosAsesor.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
@@ -20,6 +19,9 @@ const UsuariosAsesor = () => {
   const [tipoNegocio, setTipoNegocio] = useState("");
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' o 'error'
+
+  // Nuevo estado para almacenar la lista de duplicados en la carga masiva
+  const [duplicatedUsers, setDuplicatedUsers] = useState([]);
 
   // Estado para el modo edición
   const [editingUser, setEditingUser] = useState(null);
@@ -79,8 +81,8 @@ const UsuariosAsesor = () => {
       })
       .catch(err => {
         if (err.response && err.response.status === 409) {
-          // Usuario duplicado
-          setMessage("El usuario con ese email ya está asignado al asesor.");
+          // Usuario duplicado (el endpoint debe retornar 409)
+          setMessage("Este usuario ya existe con los mismos campos (duplicado).");
           setMessageType("error");
         } else {
           // Otro error
@@ -134,7 +136,7 @@ const UsuariosAsesor = () => {
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(worksheet);
   
-      const duplicates = []; // Para almacenar emails duplicados
+      const duplicates = []; // Para almacenar los usuarios duplicados
   
       for (const row of rows) {
         try {
@@ -147,8 +149,13 @@ const UsuariosAsesor = () => {
           });
         } catch (error) {
           if (error.response && error.response.status === 409) {
-            // Guardamos el email duplicado para reportarlo luego
-            duplicates.push(row.email_usuario);
+            // Guardamos el registro completo para reportarlo luego
+            duplicates.push({
+              nombre_usuario: row.nombre_usuario,
+              email_usuario: row.email_usuario,
+              pais: row.pais,
+              tipo_negocio: row.tipo_negocio
+            });
           } else {
             console.error("Error al crear usuario:", error);
           }
@@ -156,11 +163,15 @@ const UsuariosAsesor = () => {
       }
   
       if (duplicates.length > 0) {
-        setMessage(`Se cargaron los usuarios, excepto ${duplicates.length} duplicados: ${duplicates.join(", ")}`);
-        setMessageType("error");
+        // Éxito parcial: se insertaron algunos, pero omitimos duplicados
+        setMessage("Usuarios cargados con éxito, excepto los que se muestran como duplicados.");
+        setMessageType("success");
+        setDuplicatedUsers(duplicates);
       } else {
+        // No hubo duplicados
         setMessage("Usuarios cargados exitosamente desde Excel.");
         setMessageType("success");
+        setDuplicatedUsers([]);
       }
   
       handleListarUsuarios();
@@ -269,6 +280,33 @@ const UsuariosAsesor = () => {
         >
           {message}
         </p>
+      )}
+
+      {/* Si existen duplicados, mostramos la tabla debajo del mensaje */}
+      {duplicatedUsers.length > 0 && (
+        <div className="duplicated-users-container">
+          <h4>Usuarios Duplicados (no se insertaron):</h4>
+          <table className="usuarios-asesor-table">
+            <thead>
+              <tr>
+                <th>Nombre Usuario</th>
+                <th>Email</th>
+                <th>País</th>
+                <th>Tipo de Negocio</th>
+              </tr>
+            </thead>
+            <tbody>
+              {duplicatedUsers.map((dupe, index) => (
+                <tr key={index}>
+                  <td>{dupe.nombre_usuario}</td>
+                  <td>{dupe.email_usuario}</td>
+                  <td>{dupe.pais}</td>
+                  <td>{dupe.tipo_negocio}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* Seleccionar asesor */}

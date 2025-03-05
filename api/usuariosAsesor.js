@@ -41,23 +41,26 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: "Asesor no encontrado." });
       }
 
-      // Verificar duplicado (mismo email para el mismo asesor)
+      // Verificar duplicado: mismo asesorId, nombre_usuario, email_usuario, pais y tipo_negocio
       const existingUser = await usuariosAsesorColl.findOne({
         asesorId: asesor._id,
-        email_usuario: email_usuario
+        nombre_usuario,
+        email_usuario,
+        pais,
+        tipo_negocio
       });
       if (existingUser) {
         return res
           .status(409)
-          .json({ error: "El usuario con este email ya está asignado al asesor." });
+          .json({ error: "Este usuario ya existe con los mismos campos (duplicado)." });
       }
 
       // Aplicar la regla de formato al nombre del usuario
       const formattedName = formatName(nombre_usuario);
 
-      // Insertar usuario asignado al asesor con el nombre formateado
+      // Insertar usuario
       const usuarioData = {
-        asesorId: asesor._id, // Relacionar con el asesor encontrado
+        asesorId: asesor._id,
         nombre_usuario: formattedName,
         email_usuario,
         pais,
@@ -104,16 +107,20 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: "Asesor no encontrado." });
       }
 
-      // Verificar duplicado (mismo email para el mismo asesor), excluyendo el propio _id
+      // Verificar duplicado (mismo asesorId, nombre_usuario, email_usuario, pais, tipo_negocio)
+      // Excluyendo el propio _id para evitar conflicto consigo mismo
       const existingUser = await usuariosAsesorColl.findOne({
         asesorId: asesor._id,
+        nombre_usuario,
         email_usuario,
+        pais,
+        tipo_negocio,
         _id: { $ne: new ObjectId(_id) }
       });
       if (existingUser) {
         return res
           .status(409)
-          .json({ error: "El usuario con este email ya está asignado al asesor." });
+          .json({ error: "Este usuario ya existe con los mismos campos (duplicado)." });
       }
 
       const formattedName = formatName(nombre_usuario);
