@@ -1,3 +1,4 @@
+// UsuariosAsesor.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
@@ -61,7 +62,8 @@ const UsuariosAsesor = () => {
     axios.post("/api/usuariosAsesor", {
       nombre_asesor: selectedAsesor,
       nombre_usuario: nombreUsuario,
-      email_usuario: emailUsuario,
+      // Convertimos el email a minúsculas
+      email_usuario: emailUsuario.toLowerCase(),
       pais: pais,
       tipo_negocio: tipoNegocio
     })
@@ -89,7 +91,8 @@ const UsuariosAsesor = () => {
         _id: editingUser._id,
         nombre_asesor: selectedAsesor,
         nombre_usuario: nombreUsuario,
-        email_usuario: emailUsuario,
+        // Convertimos el email a minúsculas
+        email_usuario: emailUsuario.toLowerCase(),
         pais: pais,
         tipo_negocio: tipoNegocio
       });
@@ -129,7 +132,8 @@ const UsuariosAsesor = () => {
         await axios.post("/api/usuariosAsesor", {
           nombre_asesor: selectedAsesor,
           nombre_usuario: row.nombre_usuario,
-          email_usuario: row.email_usuario,
+          // Convertimos el email a minúsculas
+          email_usuario: row.email_usuario ? row.email_usuario.toLowerCase() : "",
           pais: row.pais ? row.pais.toUpperCase() : "",
           tipo_negocio: row.tipo_negocio
         });
@@ -440,4 +444,3 @@ const UsuariosAsesor = () => {
 };
 
 export default UsuariosAsesor;
-
