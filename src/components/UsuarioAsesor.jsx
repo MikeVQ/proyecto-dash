@@ -241,39 +241,44 @@ const UsuariosAsesor = () => {
         </table>
       )}
 
-      {historicoVisible && (
-        <div>
-          <h3>Histórico de Usuarios</h3>
-          <table className="usuarios-asesor-table">
-            <thead>
-              <tr>
-                <th>Nombre Usuario</th>
-                <th>Email Usuario</th>
-                <th>URL Actual</th>
-                <th>Nombre Producto</th>
-                <th>Fecha</th>
-                <th>PDF</th>
-              </tr>
-            </thead>
-            <tbody>
-              {historico.map((item) => (
-                <tr key={item._id}>
-                  <td>{item.nombre_usuario}</td>
-                  <td>{item.email_usuario}</td>
-                  <td>{item.url_actual}</td>
-                  <td>{item.nombre_producto}</td>
-                  <td>{item.fecha}</td>
-                  <td>
-                    <a href={item.url_link} target="_blank" rel="noopener noreferrer">
-                      📄
-                    </a>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+{historicoVisible && (
+  <div>
+    <h3>Histórico de Usuarios</h3>
+    <table className="usuarios-asesor-table">
+      <thead>
+        <tr>
+          <th>Nombre Usuario</th>
+          <th>Email Usuario</th>
+          <th>Producto</th>
+          <th>Fecha</th>
+          <th>Url</th>
+          <th>pdf</th>
+        </tr>
+      </thead>
+      <tbody>
+        {historico.map((item) => (
+          <tr key={item._id}>
+            <td>{item.nombre_usuario}</td>
+            <td>{item.email_usuario}</td>
+            <td>{item.nombre_producto}</td>
+            <td>{item.fecha}</td>
+            <td>
+              <a href={item.url_actual} target="_blank" rel="noopener noreferrer">
+                🔗
+              </a>
+            </td>
+            <td>
+              <a href={item.url_link} target="_blank" rel="noopener noreferrer">
+                📄
+              </a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
     </div>
   );
 };

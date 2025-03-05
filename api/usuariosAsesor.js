@@ -1,6 +1,15 @@
 // /api/usuariosAsesor.js
 import { connectToDatabase } from "./_dbConnection.js";
 
+// Función para formatear el nombre (Título: primera letra mayúscula, resto minúsculas)
+function formatName(name) {
+  if (!name) return "";
+  return name
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -25,15 +34,17 @@ export default async function handler(req, res) {
 
       // Buscar el asesor por nombre (o email si lo prefieres)
       const asesor = await asesoresColl.findOne({ nombre_asesor: nombre_asesor });
-
       if (!asesor) {
         return res.status(404).json({ error: "Asesor no encontrado." });
       }
 
-      // Insertar usuario asignado al asesor
+      // Aplicar la regla de formato al nombre del usuario
+      const formattedName = formatName(nombre_usuario);
+
+      // Insertar usuario asignado al asesor con el nombre formateado
       const usuarioData = {
         asesorId: asesor._id, // Relacionar con el asesor encontrado
-        nombre_usuario,
+        nombre_usuario: formattedName,
         email_usuario,
         pais,
         tipo_negocio
@@ -58,7 +69,6 @@ export default async function handler(req, res) {
 
     // Buscar el asesor
     const asesor = await asesoresColl.findOne({ nombre_asesor: nombre_asesor });
-
     if (!asesor) {
       return res.status(404).json({ error: "Asesor no encontrado." });
     }
