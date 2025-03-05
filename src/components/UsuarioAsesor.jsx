@@ -302,13 +302,13 @@ const UsuariosAsesor = () => {
                 <td>{u.tipo_negocio}</td>
                 <td>
                   <button
-                    className="usuarios-asesor-button action-button"
+                    className="usuarios-asesor-button editar-button"
                     onClick={() => handleEdit(u)}
                   >
                     Editar
                   </button>
                   <button
-                    className="usuarios-asesor-button action-button"
+                    className="usuarios-asesor-button eliminar-button"
                     onClick={() => handleDelete(u._id)}
                   >
                     Eliminar

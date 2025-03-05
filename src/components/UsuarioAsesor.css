@@ -118,6 +118,18 @@
     overflow: hidden;
 }
 
+/* Botón Editar en color verde */
+.usuarios-asesor-button.editar-button {
+    background-color: green;
+    margin-right: 10px;  /* Espacio a la derecha */
+  }
+  
+  /* Botón Eliminar en color rojo */
+  .usuarios-asesor-button.eliminar-button {
+    background-color: red;
+  }
+
+  
 .usuarios-asesor-table th,
 .usuarios-asesor-table td {
     padding: 12px;
