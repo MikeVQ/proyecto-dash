@@ -124,26 +124,31 @@ const UsuariosAsesor = () => {
     const file = e.target.files[0];
     if (!file) return;
   
-    if (!selectedAsesor) {
-      setMessage("Selecciona un asesor antes de subir Excel.");
-      setMessageType("error");
-      return;
-    }
-  
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(worksheet);
   
-      const duplicates = []; // Para almacenar los usuarios duplicados
+      // Array para almacenar los usuarios duplicados
+      const duplicates = [];
   
       for (const row of rows) {
         try {
+          // Verifica que la fila tenga un asesor
+          if (!row.nombre_asesor) {
+            // Podrías omitir la fila o manejarlo como error
+            console.warn("Fila omitida por no tener nombre_asesor:", row);
+            continue;
+          }
+  
           await axios.post("/api/usuariosAsesor", {
-            nombre_asesor: selectedAsesor,
+            // Usamos el nombre_asesor directamente desde la fila
+            nombre_asesor: row.nombre_asesor,
             nombre_usuario: row.nombre_usuario,
-            email_usuario: row.email_usuario ? row.email_usuario.toLowerCase() : "",
+            email_usuario: row.email_usuario
+              ? row.email_usuario.toLowerCase()
+              : "",
             pais: row.pais ? row.pais.toUpperCase() : "",
             tipo_negocio: row.tipo_negocio
           });
@@ -151,6 +156,7 @@ const UsuariosAsesor = () => {
           if (error.response && error.response.status === 409) {
             // Guardamos el registro completo para reportarlo luego
             duplicates.push({
+              nombre_asesor: row.nombre_asesor,
               nombre_usuario: row.nombre_usuario,
               email_usuario: row.email_usuario,
               pais: row.pais,
@@ -163,17 +169,19 @@ const UsuariosAsesor = () => {
       }
   
       if (duplicates.length > 0) {
-        // Éxito parcial: se insertaron algunos, pero omitimos duplicados
-        setMessage("Usuarios cargados con éxito, excepto los que se muestran como duplicados.");
+        setMessage(
+          "Usuarios cargados con éxito, excepto los que se muestran como duplicados."
+        );
         setMessageType("success");
         setDuplicatedUsers(duplicates);
       } else {
-        // No hubo duplicados
         setMessage("Usuarios cargados exitosamente desde Excel.");
         setMessageType("success");
         setDuplicatedUsers([]);
       }
   
+      // Si deseas refrescar la tabla de un asesor en particular
+      // Podrías remover este paso, o preguntar cuál asesor listar.
       handleListarUsuarios();
     } catch (error) {
       console.error("Error leyendo archivo Excel:", error);
@@ -182,14 +190,23 @@ const UsuariosAsesor = () => {
     }
   };
   
+  
   // 5. Descargar formato para carga masiva
   const handleDescargarFormato = () => {
-    const headers = ['nombre_usuario', 'email_usuario', 'pais', 'tipo_negocio'];
+    // Incluimos "nombre_asesor" al inicio
+    const headers = [
+      "nombre_asesor",
+      "nombre_usuario",
+      "email_usuario",
+      "pais",
+      "tipo_negocio"
+    ];
     const ws = XLSX.utils.aoa_to_sheet([headers]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Formato");
     XLSX.writeFile(wb, "formatoUsuarios.xlsx");
   };
+  
 
   // 6. Obtener histórico de usuarios
   const handleHistoricoUsuarios = () => {
