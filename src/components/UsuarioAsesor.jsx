@@ -167,10 +167,12 @@ const UsuariosAsesor = () => {
 
   // 8. Función para eliminar usuario
   const handleDelete = async (userId) => {
-    if (!window.confirm("¿Estás seguro de eliminar este usuario?")) return;
+    const confirmation = window.prompt("Para confirmar la eliminación, escribe 'DELETE'");
+    if (confirmation !== "DELETE") {
+      alert("No se escribió la palabra DELETE. La eliminación ha sido cancelada.");
+      return;
+    }
     try {
-      // Se asume que existe un endpoint DELETE para eliminar el usuario,
-      // en este ejemplo se envía el id como query parameter.
       await axios.delete(`/api/usuariosAsesor?_id=${userId}`);
       setMessage("Usuario eliminado correctamente.");
       handleListarUsuarios();
@@ -179,6 +181,7 @@ const UsuariosAsesor = () => {
       setMessage("Error al eliminar usuario.");
     }
   };
+  
 
   return (
     <div className="usuarios-asesor-container">
