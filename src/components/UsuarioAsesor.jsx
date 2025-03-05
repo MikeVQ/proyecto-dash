@@ -2,13 +2,17 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
-import "./UsuarioAsesor.css"; // <-- Importa tu hoja de estilos
+import "./UsuarioAsesor.css"; // Importa tu hoja de estilos
 
 const UsuariosAsesor = () => {
   const [asesores, setAsesores] = useState([]);
-  const [selectedAsesor, setSelectedAsesor] = useState(""); // Ahora almacena el nombre
+  const [selectedAsesor, setSelectedAsesor] = useState("");
   const [usuarios, setUsuarios] = useState([]);
-
+  
+  // Estados para el histórico
+  const [historico, setHistorico] = useState([]);
+  const [historicoVisible, setHistoricoVisible] = useState(false);
+  
   // Campos para crear usuario
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [emailUsuario, setEmailUsuario] = useState("");
@@ -27,7 +31,10 @@ const UsuariosAsesor = () => {
   const handleListarUsuarios = () => {
     if (!selectedAsesor) return;
     axios.get(`/api/usuariosAsesor?nombre_asesor=${encodeURIComponent(selectedAsesor)}`)
-      .then(res => setUsuarios(res.data))
+      .then(res => {
+        setUsuarios(res.data);
+        setHistoricoVisible(false); // Oculta el histórico si se listan usuarios actuales
+      })
       .catch(err => console.error("Error:", err));
   };
 
@@ -38,11 +45,11 @@ const UsuariosAsesor = () => {
       return;
     }
     axios.post("/api/usuariosAsesor", {
-      nombre_asesor: selectedAsesor, // Usamos el nombre en vez del ID
+      nombre_asesor: selectedAsesor,
       nombre_usuario: nombreUsuario,
       email_usuario: emailUsuario,
-      pais: pais, // Corrección del campo
-      tipo_negocio: tipoNegocio // Corrección del campo
+      pais: pais,
+      tipo_negocio: tipoNegocio
     })
       .then(() => {
         setMessage("Usuario creado con éxito.");
@@ -58,7 +65,7 @@ const UsuariosAsesor = () => {
       });
   };
 
-  // 4. Carga masiva desde Excel (opcional)
+  // 4. Carga masiva desde Excel
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -74,14 +81,14 @@ const UsuariosAsesor = () => {
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(worksheet);
 
-      // Opción A: Hacer un POST por cada fila
+      // Opción: Hacer un POST por cada fila
       for (const row of rows) {
         await axios.post("/api/usuariosAsesor", {
-          nombre_asesor: selectedAsesor, // Usamos el nombre
+          nombre_asesor: selectedAsesor,
           nombre_usuario: row.nombre_usuario,
           email_usuario: row.email_usuario,
-          pais: row.pais, // Corrección del campo
-          tipo_negocio: row.tipo_negocio // Corrección del campo
+          pais: row.pais,
+          tipo_negocio: row.tipo_negocio
         });
       }
 
@@ -91,6 +98,34 @@ const UsuariosAsesor = () => {
       console.error("Error leyendo archivo Excel:", error);
       setMessage("Error al procesar el archivo Excel.");
     }
+  };
+
+  // 5. Descargar formato para carga masiva
+  const handleDescargarFormato = () => {
+    const headers = ['nombre_usuario', 'email_usuario', 'pais', 'tipo_negocio'];
+    // Se crea una hoja con solo la fila de encabezados
+    const ws = XLSX.utils.aoa_to_sheet([headers]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Formato");
+    XLSX.writeFile(wb, "formatoUsuarios.xlsx");
+  };
+
+  // 6. Obtener histórico de usuarios
+  const handleHistoricoUsuarios = () => {
+    if (!selectedAsesor) {
+      setMessage("Selecciona un asesor primero.");
+      return;
+    }
+    // Se asume que existe un endpoint para obtener el histórico
+    axios.get(`/api/historicoUsuarios?nombre_asesor=${encodeURIComponent(selectedAsesor)}`)
+      .then(res => {
+        setHistorico(res.data);
+        setHistoricoVisible(true);
+      })
+      .catch(err => {
+        console.error("Error al obtener histórico:", err);
+        setMessage("Ocurrió un error al obtener el histórico.");
+      });
   };
 
   return (
@@ -118,6 +153,12 @@ const UsuariosAsesor = () => {
           onClick={handleListarUsuarios}
         >
           Listar Usuarios
+        </button>
+        <button
+          className="usuarios-asesor-button"
+          onClick={handleHistoricoUsuarios}
+        >
+          Histórico de Usuarios
         </button>
       </div>
 
@@ -162,6 +203,12 @@ const UsuariosAsesor = () => {
       {/* Carga masiva por Excel */}
       <div className="usuarios-asesor-mass-upload">
         <h3>Carga Masiva</h3>
+        <button
+          className="usuarios-asesor-button"
+          onClick={handleDescargarFormato}
+        >
+          Descargar Formato
+        </button>
         <input
           className="usuarios-asesor-file"
           type="file"
@@ -170,27 +217,63 @@ const UsuariosAsesor = () => {
         />
       </div>
 
-      {/* Tabla de usuarios */}
-      <table className="usuarios-asesor-table">
-        <thead>
-          <tr>
-            <th>Nombre Usuario</th>
-            <th>Email</th>
-            <th>País</th>
-            <th>Tipo de Negocio</th>
-          </tr>
-        </thead>
-        <tbody>
-          {usuarios.map((u) => (
-            <tr key={u._id}>
-              <td>{u.nombre_usuario}</td>
-              <td>{u.email_usuario}</td>
-              <td>{u.pais}</td> {/* Corregido */}
-              <td>{u.tipo_negocio}</td> {/* Corregido */}
+      {/* Tabla de usuarios o histórico según corresponda */}
+      {!historicoVisible && (
+        <table className="usuarios-asesor-table">
+          <thead>
+            <tr>
+              <th>Nombre Usuario</th>
+              <th>Email</th>
+              <th>País</th>
+              <th>Tipo de Negocio</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {usuarios.map((u) => (
+              <tr key={u._id}>
+                <td>{u.nombre_usuario}</td>
+                <td>{u.email_usuario}</td>
+                <td>{u.pais}</td>
+                <td>{u.tipo_negocio}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {historicoVisible && (
+        <div>
+          <h3>Histórico de Usuarios</h3>
+          <table className="usuarios-asesor-table">
+            <thead>
+              <tr>
+                <th>Nombre Usuario</th>
+                <th>Email Usuario</th>
+                <th>URL Actual</th>
+                <th>Nombre Producto</th>
+                <th>Fecha</th>
+                <th>PDF</th>
+              </tr>
+            </thead>
+            <tbody>
+              {historico.map((item) => (
+                <tr key={item._id}>
+                  <td>{item.nombre_usuario}</td>
+                  <td>{item.email_usuario}</td>
+                  <td>{item.url_actual}</td>
+                  <td>{item.nombre_producto}</td>
+                  <td>{item.fecha}</td>
+                  <td>
+                    <a href={item.url_link} target="_blank" rel="noopener noreferrer">
+                      📄
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };
