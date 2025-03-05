@@ -99,6 +99,11 @@
     margin-bottom: 20px;
 }
 
+.file-label {
+    margin-left: 10px;
+    cursor: pointer;
+  }
+
 /* Input para subir archivo */
 .usuarios-asesor-file {
     margin-top: 10px;

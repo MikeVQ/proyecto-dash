@@ -202,19 +202,22 @@ const UsuariosAsesor = () => {
 
       {/* Carga masiva por Excel */}
       <div className="usuarios-asesor-mass-upload">
-        <h3>Carga Masiva</h3>
-        <button
-          className="usuarios-asesor-button"
-          onClick={handleDescargarFormato}
-        >
-          Descargar Formato
-        </button>
+      <h3>Carga Masiva</h3>
+      <button
+        className="usuarios-asesor-button"
+        onClick={handleDescargarFormato}
+      >
+        Descargar Formato
+      </button>
+      <label className="usuarios-asesor-button file-label">
+        Elegir Archivo
         <input
-          className="usuarios-asesor-file"
           type="file"
           accept=".xlsx,.xls"
           onChange={handleFileUpload}
+          style={{ display: 'none' }}
         />
+      </label>
       </div>
 
       {/* Tabla de usuarios o histórico según corresponda */}
