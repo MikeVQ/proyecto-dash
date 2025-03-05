@@ -7,11 +7,14 @@ const UsuariosAsesor = () => {
   const [asesores, setAsesores] = useState([]);
   const [selectedAsesor, setSelectedAsesor] = useState("");
   const [usuarios, setUsuarios] = useState([]);
+  
+  // Controlar si estamos mostrando TODOS los usuarios o solo los de un asesor
+  const [allUsersMode, setAllUsersMode] = useState(false);
 
   // Estados para el histórico
   const [historico, setHistorico] = useState([]);
   const [historicoVisible, setHistoricoVisible] = useState(false);
-
+  
   // Campos para crear usuario / editar
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [emailUsuario, setEmailUsuario] = useState("");
@@ -39,6 +42,9 @@ const UsuariosAsesor = () => {
   const [batchDeleteModalVisible, setBatchDeleteModalVisible] = useState(false);
   const [batchDeleteConfirmationText, setBatchDeleteConfirmationText] = useState("");
 
+  // Estado para controlar el orden (asc / desc)
+  const [sortOrder, setSortOrder] = useState("asc");
+
   // 1. Cargar asesores al montar
   useEffect(() => {
     axios.get("/api/asesores")
@@ -59,8 +65,25 @@ const UsuariosAsesor = () => {
         setUsuarios(res.data);
         setHistoricoVisible(false); // Oculta el histórico si se listan usuarios actuales
         setSelectedUsers([]);       // Limpia selección en batch
+        setAllUsersMode(false);     // Modo normal
       })
       .catch(err => console.error("Error:", err));
+  };
+
+  // 2.b Listar TODOS los usuarios (sin filtrar por asesor)
+  const handleListarTodosLosUsuarios = () => {
+    axios.get("/api/usuariosAsesor?all=true")
+      .then(res => {
+        setUsuarios(res.data);
+        setHistoricoVisible(false);
+        setSelectedUsers([]);
+        setAllUsersMode(true); // Activamos modo "todos"
+      })
+      .catch(err => {
+        console.error("Error:", err);
+        setMessage("Error al obtener todos los usuarios.");
+        setMessageType("error");
+      });
   };
 
   // 3. Crear usuario (modo creación)
@@ -73,7 +96,6 @@ const UsuariosAsesor = () => {
     axios.post("/api/usuariosAsesor", {
       nombre_asesor: selectedAsesor,
       nombre_usuario: nombreUsuario,
-      // Convertimos el email a minúsculas
       email_usuario: emailUsuario.toLowerCase(),
       pais: pais,
       tipo_negocio: tipoNegocio
@@ -81,7 +103,6 @@ const UsuariosAsesor = () => {
       .then(() => {
         setMessage("Usuario creado con éxito.");
         setMessageType("success");
-        // Limpiar campos
         setNombreUsuario("");
         setEmailUsuario("");
         setPais("");
@@ -90,11 +111,9 @@ const UsuariosAsesor = () => {
       })
       .catch(err => {
         if (err.response && err.response.status === 409) {
-          // Usuario duplicado (el endpoint debe retornar 409)
           setMessage("Este usuario ya existe con los mismos campos (duplicado).");
           setMessageType("error");
         } else {
-          // Otro error
           setMessage("Ocurrió un error al crear el usuario.");
           setMessageType("error");
         }
@@ -108,7 +127,6 @@ const UsuariosAsesor = () => {
         _id: editingUser._id,
         nombre_asesor: selectedAsesor,
         nombre_usuario: nombreUsuario,
-        // Convertimos el email a minúsculas
         email_usuario: emailUsuario.toLowerCase(),
         pais: pais,
         tipo_negocio: tipoNegocio
@@ -133,8 +151,7 @@ const UsuariosAsesor = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Muestra el pop-up de "Cargando archivo..."
-    setUploadingFile(true);
+    setUploadingFile(true); // Muestra pop-up de "Cargando archivo..."
 
     try {
       const data = await file.arrayBuffer();
@@ -142,20 +159,16 @@ const UsuariosAsesor = () => {
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(worksheet);
 
-      // Variables para el conteo y duplicados
       let successCount = 0;
       const duplicates = [];
 
       for (const row of rows) {
         try {
-          // Verifica que la fila tenga un asesor
           if (!row.nombre_asesor) {
             console.warn("Fila omitida por no tener nombre_asesor:", row);
             continue;
           }
-
           await axios.post("/api/usuariosAsesor", {
-            // Usamos el nombre_asesor directamente desde la fila
             nombre_asesor: row.nombre_asesor,
             nombre_usuario: row.nombre_usuario,
             email_usuario: row.email_usuario
@@ -164,11 +177,9 @@ const UsuariosAsesor = () => {
             pais: row.pais ? row.pais.toUpperCase() : "",
             tipo_negocio: row.tipo_negocio
           });
-
           successCount++;
         } catch (error) {
           if (error.response && error.response.status === 409) {
-            // Guardamos el registro completo para reportarlo luego
             duplicates.push({
               nombre_asesor: row.nombre_asesor,
               nombre_usuario: row.nombre_usuario,
@@ -182,41 +193,32 @@ const UsuariosAsesor = () => {
         }
       }
 
-      // Mensaje final según los resultados
       if (successCount === 0 && duplicates.length === 0) {
-        // Posiblemente el Excel estaba vacío o todo falló por otro motivo
         setMessage("No se insertaron usuarios. Verifica tu archivo o revisa los errores en consola.");
         setMessageType("error");
         setDuplicatedUsers([]);
       } else if (duplicates.length > 0) {
-        // Éxito parcial
-        setMessage(
-          `Se subieron ${successCount} usuario(s) con éxito. Se omitieron ${duplicates.length} por duplicados.`
-        );
+        setMessage(`Se subieron ${successCount} usuario(s) con éxito. Se omitieron ${duplicates.length} por duplicados.`);
         setMessageType("success");
         setDuplicatedUsers(duplicates);
       } else {
-        // No hubo duplicados
         setMessage(`Usuarios cargados exitosamente. Total insertados: ${successCount}.`);
         setMessageType("success");
         setDuplicatedUsers([]);
       }
 
-      // Refrescar la tabla (opcional)
       handleListarUsuarios();
     } catch (error) {
       console.error("Error leyendo archivo Excel:", error);
       setMessage("Error al procesar el archivo Excel.");
       setMessageType("error");
     } finally {
-      // Se cierra el pop-up de "Cargando archivo..."
-      setUploadingFile(false);
+      setUploadingFile(false); // Cierra pop-up
     }
   };
 
   // 5. Descargar formato para carga masiva
   const handleDescargarFormato = () => {
-    // Incluimos "nombre_asesor" al inicio
     const headers = [
       "nombre_asesor",
       "nombre_usuario",
@@ -242,6 +244,7 @@ const UsuariosAsesor = () => {
         setHistorico(res.data);
         setHistoricoVisible(true);
         setSelectedUsers([]);
+        setAllUsersMode(false);
       })
       .catch(err => {
         console.error("Error al obtener histórico:", err);
@@ -250,7 +253,7 @@ const UsuariosAsesor = () => {
       });
   };
 
-  // 7. Función para editar usuario: llena el formulario con los datos a modificar
+  // 7. Función para editar usuario
   const handleEdit = (user) => {
     setEditingUser(user);
     setNombreUsuario(user.nombre_usuario);
@@ -265,7 +268,6 @@ const UsuariosAsesor = () => {
     setDeleteConfirmationText("");
     setDeleteModalVisible(true);
   };
-
   const confirmDelete = async () => {
     if (deleteConfirmationText !== "DELETE") {
       alert("La palabra ingresada no es correcta.");
@@ -284,7 +286,6 @@ const UsuariosAsesor = () => {
       setDeleteModalVisible(false);
     }
   };
-
   const cancelDelete = () => {
     setDeleteModalVisible(false);
     setDeleteUserId(null);
@@ -297,33 +298,23 @@ const UsuariosAsesor = () => {
   };
 
   // ============ ELIMINACIÓN POR LOTES (CON POP-UP) ============
-
-  // Almacenar y actualizar la selección de checkboxes
   const handleCheckboxChange = (userId) => {
     setSelectedUsers((prevSelected) => {
       if (prevSelected.includes(userId)) {
-        // Quitar de la selección
         return prevSelected.filter((id) => id !== userId);
       } else {
-        // Agregar a la selección
         return [...prevSelected, userId];
       }
     });
   };
-
-  // Seleccionar / deseleccionar todos
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      // Seleccionar todos
       const allIds = usuarios.map((u) => u._id);
       setSelectedUsers(allIds);
     } else {
-      // Deseleccionar todos
       setSelectedUsers([]);
     }
   };
-
-  // Abre el pop-up para confirmar la eliminación de varios usuarios
   const openBatchDeleteModal = () => {
     if (selectedUsers.length === 0) {
       alert("No has seleccionado ningún usuario para eliminar.");
@@ -332,14 +323,10 @@ const UsuariosAsesor = () => {
     setBatchDeleteConfirmationText("");
     setBatchDeleteModalVisible(true);
   };
-
-  // Cierra el pop-up de eliminación por lotes
   const cancelBatchDelete = () => {
     setBatchDeleteModalVisible(false);
     setBatchDeleteConfirmationText("");
   };
-
-  // Confirma la eliminación por lotes (si el usuario escribe "DELETE")
   const confirmBatchDelete = async () => {
     if (batchDeleteConfirmationText !== "DELETE") {
       alert("La palabra ingresada no es correcta.");
@@ -361,6 +348,20 @@ const UsuariosAsesor = () => {
       setBatchDeleteModalVisible(false);
     }
   };
+
+  // ============ ORDENAR A-Z / Z-A ============
+  const handleToggleSortOrder = () => {
+    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+  };
+
+  // Al renderizar la tabla, aplicamos orden a los usuarios
+  const sortedUsuarios = [...usuarios].sort((a, b) => {
+    const nameA = a.nombre_usuario.toLowerCase();
+    const nameB = b.nombre_usuario.toLowerCase();
+    if (nameA < nameB) return sortOrder === "asc" ? -1 : 1;
+    if (nameA > nameB) return sortOrder === "asc" ? 1 : -1;
+    return 0;
+  });
 
   return (
     <div className="usuarios-asesor-container">
@@ -450,7 +451,7 @@ const UsuariosAsesor = () => {
         </div>
       )}
 
-      {/* Seleccionar asesor */}
+      {/* Botones de selección de asesor y vistas */}
       <div className="usuarios-asesor-select-row">
         <select
           className="usuarios-asesor-select"
@@ -470,6 +471,9 @@ const UsuariosAsesor = () => {
         </button>
         <button className="usuarios-asesor-button" onClick={handleHistoricoUsuarios}>
           Histórico de Usuarios
+        </button>
+        <button className="usuarios-asesor-button" onClick={handleListarTodosLosUsuarios}>
+          Todos los Usuarios
         </button>
       </div>
 
@@ -542,14 +546,20 @@ const UsuariosAsesor = () => {
       </div>
 
       {/* Botón para eliminar varios usuarios a la vez */}
-      {!historicoVisible && usuarios.length > 0 && (
-        <button
-          className="usuarios-asesor-button eliminar-button"
-          onClick={openBatchDeleteModal}
-          style={{ marginBottom: "10px" }}
-        >
-          Eliminar seleccionados
-        </button>
+      {!historicoVisible && sortedUsuarios.length > 0 && (
+        <div style={{ marginBottom: "10px" }}>
+          <button
+            className="usuarios-asesor-button eliminar-button"
+            onClick={openBatchDeleteModal}
+            style={{ marginRight: "10px" }}
+          >
+            Eliminar seleccionados
+          </button>
+          {/* Botón para alternar orden A-Z / Z-A */}
+          <button className="usuarios-asesor-button" onClick={handleToggleSortOrder}>
+            {sortOrder === "asc" ? "Ordenar Z-A" : "Ordenar A-Z"}
+          </button>
+        </div>
       )}
 
       {/* Tabla de usuarios (cuando no se muestra el histórico) */}
@@ -557,17 +567,18 @@ const UsuariosAsesor = () => {
         <table className="usuarios-asesor-table">
           <thead>
             <tr>
-              {/* Checkbox para seleccionar/deseleccionar todos */}
               <th>
                 <input
                   type="checkbox"
                   onChange={handleSelectAll}
                   checked={
-                    selectedUsers.length === usuarios.length &&
-                    usuarios.length > 0
+                    selectedUsers.length === sortedUsuarios.length &&
+                    sortedUsuarios.length > 0
                   }
                 />
               </th>
+              {/* Si estamos en modo "Todos los usuarios", mostramos la columna Asesor */}
+              {allUsersMode && <th>Asesor</th>}
               <th>Nombre Usuario</th>
               <th>Email</th>
               <th>País</th>
@@ -576,37 +587,42 @@ const UsuariosAsesor = () => {
             </tr>
           </thead>
           <tbody>
-            {usuarios.map((u) => (
-              <tr key={u._id}>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={selectedUsers.includes(u._id)}
-                    onChange={() => handleCheckboxChange(u._id)}
-                  />
-                </td>
-                <td>{u.nombre_usuario}</td>
-                <td>{u.email_usuario}</td>
-                <td>{u.pais}</td>
-                <td>{u.tipo_negocio}</td>
-                <td>
-                  <div className="action-buttons">
-                    <button
-                      className="usuarios-asesor-button editar-button"
-                      onClick={() => handleEdit(u)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      className="usuarios-asesor-button eliminar-button"
-                      onClick={() => handleDelete(u._id)}
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {sortedUsuarios.map((u) => {
+              // Si venimos de "Todos los usuarios", el backend envía "asesorData.nombre_asesor"
+              const asesorName = u.asesorData?.nombre_asesor || "";
+              return (
+                <tr key={u._id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedUsers.includes(u._id)}
+                      onChange={() => handleCheckboxChange(u._id)}
+                    />
+                  </td>
+                  {allUsersMode && <td>{asesorName}</td>}
+                  <td>{u.nombre_usuario}</td>
+                  <td>{u.email_usuario}</td>
+                  <td>{u.pais}</td>
+                  <td>{u.tipo_negocio}</td>
+                  <td>
+                    <div className="action-buttons">
+                      <button
+                        className="usuarios-asesor-button editar-button"
+                        onClick={() => handleEdit(u)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="usuarios-asesor-button eliminar-button"
+                        onClick={() => handleDelete(u._id)}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}

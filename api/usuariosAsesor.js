@@ -74,10 +74,45 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Error interno del servidor." });
     }
 
-  // Obtener usuarios de un asesor (GET)
+  // Obtener usuarios (GET)
   } else if (req.method === "GET") {
-    const { nombre_asesor } = req.query;
+    const { all, nombre_asesor } = req.query;
 
+    // 1) Caso: ?all=true -> retornar TODOS los usuarios con lookup
+    if (all === "true") {
+      try {
+        const pipeline = [
+          {
+            $lookup: {
+              from: "asesores",
+              localField: "asesorId",
+              foreignField: "_id",
+              as: "asesorData"
+            }
+          },
+          { $unwind: "$asesorData" },
+          {
+            $project: {
+              _id: 1,
+              nombre_usuario: 1,
+              email_usuario: 1,
+              pais: 1,
+              tipo_negocio: 1,
+              asesorId: 1,
+              "asesorData.nombre_asesor": 1
+            }
+          }
+        ];
+
+        const allUsers = await usuariosAsesorColl.aggregate(pipeline).toArray();
+        return res.status(200).json(allUsers);
+      } catch (error) {
+        console.error("Error al obtener todos los usuarios:", error);
+        return res.status(500).json({ error: "Error interno del servidor." });
+      }
+    }
+
+    // 2) Caso normal: ?nombre_asesor=...
     if (!nombre_asesor) {
       return res.status(400).json({ error: "Se requiere el nombre del asesor." });
     }
