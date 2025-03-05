@@ -7,11 +7,11 @@ const UsuariosAsesor = () => {
   const [asesores, setAsesores] = useState([]);
   const [selectedAsesor, setSelectedAsesor] = useState("");
   const [usuarios, setUsuarios] = useState([]);
-  
+
   // Estados para el histórico
   const [historico, setHistorico] = useState([]);
   const [historicoVisible, setHistoricoVisible] = useState(false);
-  
+
   // Campos para crear usuario / editar
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [emailUsuario, setEmailUsuario] = useState("");
@@ -34,8 +34,10 @@ const UsuariosAsesor = () => {
   // Estado para mostrar el pop-up de "Cargando archivo..."
   const [uploadingFile, setUploadingFile] = useState(false);
 
-  // Estado y lógica para eliminación por lotes
+  // Estados y lógica para eliminación por lotes
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [batchDeleteModalVisible, setBatchDeleteModalVisible] = useState(false);
+  const [batchDeleteConfirmationText, setBatchDeleteConfirmationText] = useState("");
 
   // 1. Cargar asesores al montar
   useEffect(() => {
@@ -133,17 +135,17 @@ const UsuariosAsesor = () => {
 
     // Muestra el pop-up de "Cargando archivo..."
     setUploadingFile(true);
-  
+
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(worksheet);
-  
+
       // Variables para el conteo y duplicados
       let successCount = 0;
       const duplicates = [];
-  
+
       for (const row of rows) {
         try {
           // Verifica que la fila tenga un asesor
@@ -151,7 +153,7 @@ const UsuariosAsesor = () => {
             console.warn("Fila omitida por no tener nombre_asesor:", row);
             continue;
           }
-  
+
           await axios.post("/api/usuariosAsesor", {
             // Usamos el nombre_asesor directamente desde la fila
             nombre_asesor: row.nombre_asesor,
@@ -199,8 +201,8 @@ const UsuariosAsesor = () => {
         setMessageType("success");
         setDuplicatedUsers([]);
       }
-  
-      // Si deseas refrescar la tabla de un asesor en particular
+
+      // Refrescar la tabla (opcional)
       handleListarUsuarios();
     } catch (error) {
       console.error("Error leyendo archivo Excel:", error);
@@ -211,7 +213,7 @@ const UsuariosAsesor = () => {
       setUploadingFile(false);
     }
   };
-  
+
   // 5. Descargar formato para carga masiva
   const handleDescargarFormato = () => {
     // Incluimos "nombre_asesor" al inicio
@@ -294,7 +296,7 @@ const UsuariosAsesor = () => {
     handleListarUsuarios();
   };
 
-  // ============ ELIMINACIÓN POR LOTES ============
+  // ============ ELIMINACIÓN POR LOTES (CON POP-UP) ============
 
   // Almacenar y actualizar la selección de checkboxes
   const handleCheckboxChange = (userId) => {
@@ -321,13 +323,26 @@ const UsuariosAsesor = () => {
     }
   };
 
-  // Llamada al nuevo endpoint para eliminar en lote
-  const handleBatchDelete = async () => {
+  // Abre el pop-up para confirmar la eliminación de varios usuarios
+  const openBatchDeleteModal = () => {
     if (selectedUsers.length === 0) {
       alert("No has seleccionado ningún usuario para eliminar.");
       return;
     }
-    if (!window.confirm("¿Deseas eliminar los usuarios seleccionados?")) {
+    setBatchDeleteConfirmationText("");
+    setBatchDeleteModalVisible(true);
+  };
+
+  // Cierra el pop-up de eliminación por lotes
+  const cancelBatchDelete = () => {
+    setBatchDeleteModalVisible(false);
+    setBatchDeleteConfirmationText("");
+  };
+
+  // Confirma la eliminación por lotes (si el usuario escribe "DELETE")
+  const confirmBatchDelete = async () => {
+    if (batchDeleteConfirmationText !== "DELETE") {
+      alert("La palabra ingresada no es correcta.");
       return;
     }
     try {
@@ -337,11 +352,13 @@ const UsuariosAsesor = () => {
       setMessage(res.data.message || "Usuarios eliminados correctamente.");
       setMessageType("success");
       setSelectedUsers([]);
+      setBatchDeleteModalVisible(false);
       handleListarUsuarios();
     } catch (error) {
       console.error("Error en eliminación masiva:", error);
       setMessage("Ocurrió un error al eliminar los usuarios seleccionados.");
       setMessageType("error");
+      setBatchDeleteModalVisible(false);
     }
   };
 
@@ -353,6 +370,30 @@ const UsuariosAsesor = () => {
           <div className="modal">
             <h3>Cargando archivo...</h3>
             <p>Esto no demorará mucho tiempo.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Pop-up para confirmación de eliminación por lotes */}
+      {batchDeleteModalVisible && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Confirmar eliminación masiva</h3>
+            <p>Para confirmar la eliminación, escribe "DELETE"</p>
+            <input
+              type="text"
+              value={batchDeleteConfirmationText}
+              onChange={(e) => setBatchDeleteConfirmationText(e.target.value)}
+              placeholder='Escribe "DELETE"'
+            />
+            <div className="modal-buttons">
+              <button className="usuarios-asesor-button" onClick={confirmBatchDelete}>
+                Confirmar
+              </button>
+              <button className="usuarios-asesor-button" onClick={cancelBatchDelete}>
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -494,7 +535,7 @@ const UsuariosAsesor = () => {
             />
           </label>
         </div>
-        
+
         <button className="usuarios-asesor-button refresh-button" onClick={handleRefresh}>
           Refrescar Tabla
         </button>
@@ -504,7 +545,7 @@ const UsuariosAsesor = () => {
       {!historicoVisible && usuarios.length > 0 && (
         <button
           className="usuarios-asesor-button eliminar-button"
-          onClick={handleBatchDelete}
+          onClick={openBatchDeleteModal}
           style={{ marginBottom: "10px" }}
         >
           Eliminar seleccionados
