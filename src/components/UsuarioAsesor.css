@@ -118,6 +118,44 @@
     overflow: hidden;
 }
 
+/* Modal overlay para centrar el pop up con fondo semitransparente */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  /* Contenedor del modal */
+  .modal {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+  }
+  
+  /* Estilo para el input del modal */
+  .modal input[type="text"] {
+    width: 80%;
+    padding: 8px;
+    margin: 10px 0;
+  }
+  
+  /* Contenedor de botones dentro del modal */
+  .modal-buttons {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  
 /* Botón Editar en color verde */
 .usuarios-asesor-button.editar-button {
     background-color: green;

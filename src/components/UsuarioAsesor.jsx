@@ -23,6 +23,11 @@ const UsuariosAsesor = () => {
   // Estado para el modo edición
   const [editingUser, setEditingUser] = useState(null);
 
+  // Estados para el modal de eliminación
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteUserId, setDeleteUserId] = useState(null);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
+
   // 1. Cargar asesores al montar
   useEffect(() => {
     axios.get("/api/asesores")
@@ -165,23 +170,36 @@ const UsuariosAsesor = () => {
     setTipoNegocio(user.tipo_negocio);
   };
 
-  // 8. Función para eliminar usuario
-  const handleDelete = async (userId) => {
-    const confirmation = window.prompt("Para confirmar la eliminación, escribe 'DELETE'");
-    if (confirmation !== "DELETE") {
-      alert("No se escribió la palabra DELETE. La eliminación ha sido cancelada.");
+  // 8. Función para abrir modal de eliminación
+  const handleDelete = (userId) => {
+    setDeleteUserId(userId);
+    setDeleteConfirmationText("");
+    setDeleteModalVisible(true);
+  };
+
+  // Funciones para el modal de eliminación
+  const confirmDelete = async () => {
+    if (deleteConfirmationText !== "DELETE") {
+      alert("La palabra ingresada no es correcta.");
       return;
     }
     try {
-      await axios.delete(`/api/usuariosAsesor?_id=${userId}`);
+      await axios.delete(`/api/usuariosAsesor?_id=${deleteUserId}`);
       setMessage("Usuario eliminado correctamente.");
+      setDeleteModalVisible(false);
       handleListarUsuarios();
     } catch (error) {
       console.error("Error al eliminar usuario:", error);
       setMessage("Error al eliminar usuario.");
+      setDeleteModalVisible(false);
     }
   };
-  
+
+  const cancelDelete = () => {
+    setDeleteModalVisible(false);
+    setDeleteUserId(null);
+    setDeleteConfirmationText("");
+  };
 
   return (
     <div className="usuarios-asesor-container">
@@ -362,6 +380,29 @@ const UsuariosAsesor = () => {
         </div>
       )}
 
+      {/* Modal de confirmación de eliminación */}
+      {deleteModalVisible && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Confirmar eliminación</h3>
+            <p>Para confirmar la eliminación, escribe "DELETE"</p>
+            <input
+              type="text"
+              value={deleteConfirmationText}
+              onChange={(e) => setDeleteConfirmationText(e.target.value)}
+              placeholder='Escribe "DELETE"'
+            />
+            <div className="modal-buttons">
+              <button className="usuarios-asesor-button" onClick={confirmDelete}>
+                Confirmar
+              </button>
+              <button className="usuarios-asesor-button" onClick={cancelDelete}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
