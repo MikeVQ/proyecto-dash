@@ -87,7 +87,7 @@ const UsuariosAsesor = () => {
           nombre_asesor: selectedAsesor,
           nombre_usuario: row.nombre_usuario,
           email_usuario: row.email_usuario,
-          pais: row.pais,
+          pais: row.pais ? row.pais.toUpperCase() : "",
           tipo_negocio: row.tipo_negocio
         });
       }
@@ -179,12 +179,13 @@ const UsuariosAsesor = () => {
           onChange={(e) => setEmailUsuario(e.target.value)}
         />
         <input
-          className="usuarios-asesor-input"
-          type="text"
-          placeholder="País"
-          value={pais}
-          onChange={(e) => setPais(e.target.value)}
+        className="usuarios-asesor-input"
+        type="text"
+        placeholder="País (ej. US, EC)"
+        value={pais}
+        onChange={(e) => setPais(e.target.value.toUpperCase())}
         />
+
         <input
           className="usuarios-asesor-input"
           type="text"
