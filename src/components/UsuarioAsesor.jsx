@@ -130,14 +130,14 @@ const UsuariosAsesor = () => {
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(worksheet);
   
-      // Array para almacenar los usuarios duplicados
+      // Variables para el conteo y duplicados
+      let successCount = 0;
       const duplicates = [];
   
       for (const row of rows) {
         try {
           // Verifica que la fila tenga un asesor
           if (!row.nombre_asesor) {
-            // Podrías omitir la fila o manejarlo como error
             console.warn("Fila omitida por no tener nombre_asesor:", row);
             continue;
           }
@@ -152,6 +152,8 @@ const UsuariosAsesor = () => {
             pais: row.pais ? row.pais.toUpperCase() : "",
             tipo_negocio: row.tipo_negocio
           });
+
+          successCount++;
         } catch (error) {
           if (error.response && error.response.status === 409) {
             // Guardamos el registro completo para reportarlo luego
@@ -167,15 +169,23 @@ const UsuariosAsesor = () => {
           }
         }
       }
-  
-      if (duplicates.length > 0) {
+
+      // Mensaje final según los resultados
+      if (successCount === 0 && duplicates.length === 0) {
+        // Posiblemente el Excel estaba vacío o todo falló por otro motivo
+        setMessage("No se insertaron usuarios. Verifica tu archivo o revisa los errores en consola.");
+        setMessageType("error");
+        setDuplicatedUsers([]);
+      } else if (duplicates.length > 0) {
+        // Éxito parcial
         setMessage(
-          "Usuarios cargados con éxito, excepto los que se muestran como duplicados."
+          `Se subieron ${successCount} usuario(s) con éxito. Se omitieron ${duplicates.length} por duplicados.`
         );
         setMessageType("success");
         setDuplicatedUsers(duplicates);
       } else {
-        setMessage("Usuarios cargados exitosamente desde Excel.");
+        // No hubo duplicados
+        setMessage(`Usuarios cargados exitosamente. Total insertados: ${successCount}.`);
         setMessageType("success");
         setDuplicatedUsers([]);
       }
@@ -189,7 +199,6 @@ const UsuariosAsesor = () => {
       setMessageType("error");
     }
   };
-  
   
   // 5. Descargar formato para carga masiva
   const handleDescargarFormato = () => {
@@ -206,7 +215,6 @@ const UsuariosAsesor = () => {
     XLSX.utils.book_append_sheet(wb, ws, "Formato");
     XLSX.writeFile(wb, "formatoUsuarios.xlsx");
   };
-  
 
   // 6. Obtener histórico de usuarios
   const handleHistoricoUsuarios = () => {
@@ -306,6 +314,7 @@ const UsuariosAsesor = () => {
           <table className="usuarios-asesor-table">
             <thead>
               <tr>
+                <th>Asesor</th>
                 <th>Nombre Usuario</th>
                 <th>Email</th>
                 <th>País</th>
@@ -315,6 +324,7 @@ const UsuariosAsesor = () => {
             <tbody>
               {duplicatedUsers.map((dupe, index) => (
                 <tr key={index}>
+                  <td>{dupe.nombre_asesor}</td>
                   <td>{dupe.nombre_usuario}</td>
                   <td>{dupe.email_usuario}</td>
                   <td>{dupe.pais}</td>
