@@ -78,9 +78,15 @@ const UsuariosAsesor = () => {
         handleListarUsuarios(); // Refresca la tabla
       })
       .catch(err => {
-        console.error("Error al crear usuario:", err);
-        setMessage("Ocurrió un error al crear el usuario.");
-        setMessageType("error");
+        if (err.response && err.response.status === 409) {
+          // Usuario duplicado
+          setMessage("El usuario con ese email ya está asignado al asesor.");
+          setMessageType("error");
+        } else {
+          // Otro error
+          setMessage("Ocurrió un error al crear el usuario.");
+          setMessageType("error");
+        }
       });
   };
 
@@ -115,32 +121,48 @@ const UsuariosAsesor = () => {
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
+  
     if (!selectedAsesor) {
       setMessage("Selecciona un asesor antes de subir Excel.");
       setMessageType("error");
       return;
     }
-
+  
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(worksheet);
-
+  
+      const duplicates = []; // Para almacenar emails duplicados
+  
       for (const row of rows) {
-        await axios.post("/api/usuariosAsesor", {
-          nombre_asesor: selectedAsesor,
-          nombre_usuario: row.nombre_usuario,
-          // Convertimos el email a minúsculas
-          email_usuario: row.email_usuario ? row.email_usuario.toLowerCase() : "",
-          pais: row.pais ? row.pais.toUpperCase() : "",
-          tipo_negocio: row.tipo_negocio
-        });
+        try {
+          await axios.post("/api/usuariosAsesor", {
+            nombre_asesor: selectedAsesor,
+            nombre_usuario: row.nombre_usuario,
+            email_usuario: row.email_usuario ? row.email_usuario.toLowerCase() : "",
+            pais: row.pais ? row.pais.toUpperCase() : "",
+            tipo_negocio: row.tipo_negocio
+          });
+        } catch (error) {
+          if (error.response && error.response.status === 409) {
+            // Guardamos el email duplicado para reportarlo luego
+            duplicates.push(row.email_usuario);
+          } else {
+            console.error("Error al crear usuario:", error);
+          }
+        }
       }
-
-      setMessage("Usuarios cargados exitosamente desde Excel.");
-      setMessageType("success");
+  
+      if (duplicates.length > 0) {
+        setMessage(`Se cargaron los usuarios, excepto ${duplicates.length} duplicados: ${duplicates.join(", ")}`);
+        setMessageType("error");
+      } else {
+        setMessage("Usuarios cargados exitosamente desde Excel.");
+        setMessageType("success");
+      }
+  
       handleListarUsuarios();
     } catch (error) {
       console.error("Error leyendo archivo Excel:", error);
@@ -148,7 +170,7 @@ const UsuariosAsesor = () => {
       setMessageType("error");
     }
   };
-
+  
   // 5. Descargar formato para carga masiva
   const handleDescargarFormato = () => {
     const headers = ['nombre_usuario', 'email_usuario', 'pais', 'tipo_negocio'];
@@ -280,6 +302,7 @@ const UsuariosAsesor = () => {
           placeholder="Nombre Usuario"
           value={nombreUsuario}
           onChange={(e) => setNombreUsuario(e.target.value)}
+          autoComplete="off"
         />
         <input
           className="usuarios-asesor-input"
@@ -287,6 +310,7 @@ const UsuariosAsesor = () => {
           placeholder="Email Usuario"
           value={emailUsuario}
           onChange={(e) => setEmailUsuario(e.target.value)}
+          autoComplete="off"
         />
         <input
           className="usuarios-asesor-input"
@@ -294,6 +318,7 @@ const UsuariosAsesor = () => {
           placeholder="País (ej. US, EC)"
           value={pais}
           onChange={(e) => setPais(e.target.value.toUpperCase())}
+          autoComplete="off"
         />
         <input
           className="usuarios-asesor-input"
@@ -301,6 +326,7 @@ const UsuariosAsesor = () => {
           placeholder="Tipo de Negocio"
           value={tipoNegocio}
           onChange={(e) => setTipoNegocio(e.target.value)}
+          autoComplete="off"
         />
         {editingUser ? (
           <button className="usuarios-asesor-button" onClick={handleUpdateUsuario}>

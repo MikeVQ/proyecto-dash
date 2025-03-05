@@ -36,9 +36,20 @@ export default async function handler(req, res) {
       }
 
       // Buscar el asesor por nombre
-      const asesor = await asesoresColl.findOne({ nombre_asesor: nombre_asesor });
+      const asesor = await asesoresColl.findOne({ nombre_asesor });
       if (!asesor) {
         return res.status(404).json({ error: "Asesor no encontrado." });
+      }
+
+      // Verificar duplicado (mismo email para el mismo asesor)
+      const existingUser = await usuariosAsesorColl.findOne({
+        asesorId: asesor._id,
+        email_usuario: email_usuario
+      });
+      if (existingUser) {
+        return res
+          .status(409)
+          .json({ error: "El usuario con este email ya está asignado al asesor." });
       }
 
       // Aplicar la regla de formato al nombre del usuario
@@ -69,7 +80,7 @@ export default async function handler(req, res) {
     }
 
     // Buscar el asesor
-    const asesor = await asesoresColl.findOne({ nombre_asesor: nombre_asesor });
+    const asesor = await asesoresColl.findOne({ nombre_asesor });
     if (!asesor) {
       return res.status(404).json({ error: "Asesor no encontrado." });
     }
@@ -88,22 +99,36 @@ export default async function handler(req, res) {
       }
 
       // Buscar el asesor por nombre
-      const asesor = await asesoresColl.findOne({ nombre_asesor: nombre_asesor });
+      const asesor = await asesoresColl.findOne({ nombre_asesor });
       if (!asesor) {
         return res.status(404).json({ error: "Asesor no encontrado." });
+      }
+
+      // Verificar duplicado (mismo email para el mismo asesor), excluyendo el propio _id
+      const existingUser = await usuariosAsesorColl.findOne({
+        asesorId: asesor._id,
+        email_usuario,
+        _id: { $ne: new ObjectId(_id) }
+      });
+      if (existingUser) {
+        return res
+          .status(409)
+          .json({ error: "El usuario con este email ya está asignado al asesor." });
       }
 
       const formattedName = formatName(nombre_usuario);
 
       const updateResult = await usuariosAsesorColl.updateOne(
         { _id: new ObjectId(_id) },
-        { $set: { 
-            nombre_usuario: formattedName, 
-            email_usuario, 
-            pais, 
-            tipo_negocio, 
-            asesorId: asesor._id 
-          } }
+        {
+          $set: {
+            nombre_usuario: formattedName,
+            email_usuario,
+            pais,
+            tipo_negocio,
+            asesorId: asesor._id
+          }
+        }
       );
 
       if (updateResult.modifiedCount === 0) {
