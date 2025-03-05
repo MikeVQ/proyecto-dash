@@ -1,7 +1,7 @@
 /* Contenedor principal: caja blanca, centrada, con sombra */
 .usuarios-asesor-container {
     max-width: 900px;
-    margin: 40px auto; /* Centra horizontalmente el contenedor */
+    margin: 40px auto;
     background-color: #fff;
     color: #000;
     border-radius: 8px;
@@ -24,29 +24,51 @@
     justify-content: space-between;
 }
 
-/* Mensaje de error o éxito */
-.usuarios-asesor-message {
-    background-color: #fce4ec; /* Fondo rosado claro */
-    color: #d32f2f; /* Texto rojo */
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
 /* Mensajes de éxito o error */
 .message-success {
     background-color: #e0f8e9; /* Fondo verde claro */
     color: green;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    text-align: center;
 }
-
 .message-error {
     background-color: #fce4ec; /* Fondo rosado claro */
     color: red;
+}
+
+/* Contenedor de la sección de carga masiva */
+.usuarios-asesor-mass-upload {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px; /* Espacio debajo de la sección */
+}
+
+/* Contenedor para agrupar el texto "Carga Masiva", "Descargar Formato" y "Elegir Archivo" */
+.mass-upload-left {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Alinear los botones de Editar y Eliminar en la misma fila con espacio */
+.action-buttons {
+    display: flex;
+    gap: 10px; /* Espacio entre botones */
+}
+
+/* Botón Editar (verde) */
+.editar-button {
+    background-color: green;
+}
+
+/* Botón Eliminar (rojo) */
+.eliminar-button {
+    background-color: red;
+}
+
+/* Mensaje de error o éxito */
+.usuarios-asesor-message {
+    background-color: #fce4ec; /* Fondo rosado claro */
+    color: #d32f2f; /* Texto rojo */
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 20px;
@@ -59,7 +81,6 @@
     align-items: center;
     gap: 10px;
     margin-bottom: 20px;
-    justify-content: center; /* Centra horizontalmente */
 }
 
 /* Estilo para el select */
@@ -84,7 +105,6 @@
     font-weight: bold;
     transition: background 0.3s;
 }
-
 .usuarios-asesor-button:hover {
     background: #357abd;
 }
@@ -95,7 +115,6 @@
     flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 20px;
-    justify-content: center; /* Centra horizontalmente */
 }
 
 /* Inputs del formulario */
@@ -124,13 +143,8 @@
 
 /* Contenedor de carga masiva */
 .usuarios-asesor-mass-upload {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center; /* Centra horizontalmente */
     margin-bottom: 20px;
 }
-
 .file-label {
     margin-left: 10px;
     cursor: pointer;
@@ -141,16 +155,22 @@
     margin-top: 10px;
 }
 
-/* Tabla de usuarios */
+/* Tabla de usuarios (vista normal) */
 .usuarios-asesor-table {
-    width: auto; /* Permite que la tabla se ajuste a su contenido */
-    margin: 0 auto; /* Centra horizontalmente la tabla */
+    width: 100%;
     border-collapse: collapse;
     background-color: #fff;
     border-radius: 8px;
     overflow: hidden;
 }
 
+/* Tabla de "Todos los usuarios", centrada */
+.all-users-table {
+    width: auto;      /* Ajusta al contenido */
+    margin: 0 auto;   /* Centra horizontalmente */
+}
+
+/* Encabezado y celdas */
 .usuarios-asesor-table th,
 .usuarios-asesor-table td {
     padding: 12px;
@@ -172,27 +192,6 @@
 /* Asegurar que las filas tengan buena separación */
 .usuarios-asesor-table tbody tr:hover {
     background-color: #e9ecef;
-}
-
-/* Contenedor de la sección de carga masiva */
-.usuarios-asesor-mass-upload {
-    margin-bottom: 20px;
-}
-
-/* Alinear los botones de Editar y Eliminar en la misma fila con espacio */
-.action-buttons {
-    display: flex;
-    gap: 10px; /* Espacio entre botones */
-}
-
-/* Botón Editar (verde) */
-.editar-button {
-    background-color: green;
-}
-
-/* Botón Eliminar (rojo) */
-.eliminar-button {
-    background-color: red;
 }
 
 /* Modal overlay para centrar el pop up con fondo semitransparente */
@@ -222,7 +221,7 @@
 .modal input[type="text"] {
     background-color: #fff;
     color: #000;
-    border: 1px solid #ccc;
+    border: 1px solid #ccc; /* Opcional: define un borde */
     padding: 8px;
     margin: 10px 0;
     width: 80%;
@@ -240,8 +239,22 @@
     .usuarios-asesor-form {
         flex-direction: column;
     }
-    
     .usuarios-asesor-input {
         width: 100%;
     }
+}
+
+/* ================== CLASE ÚNICA PARA "TODOS LOS USUARIOS" ================== */
+.todos-usuarios-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;      /* Centra el contenido en el eje horizontal */
+    justify-content: center;  /* Centra en el eje vertical si fuese necesario */
+    margin-top: 20px;         /* Espacio adicional arriba */
+}
+
+/* Ajustar la tabla cuando se use .todos-usuarios-container */
+.todos-usuarios-container .usuarios-asesor-table {
+    width: auto;
+    margin: 0 auto; /* Centra horizontalmente */
 }
