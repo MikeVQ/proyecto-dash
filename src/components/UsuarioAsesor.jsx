@@ -13,12 +13,15 @@ const UsuariosAsesor = () => {
   const [historico, setHistorico] = useState([]);
   const [historicoVisible, setHistoricoVisible] = useState(false);
   
-  // Campos para crear usuario
+  // Campos para crear usuario / editar
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [emailUsuario, setEmailUsuario] = useState("");
   const [pais, setPais] = useState("");
   const [tipoNegocio, setTipoNegocio] = useState("");
   const [message, setMessage] = useState("");
+
+  // Estado para el modo edición
+  const [editingUser, setEditingUser] = useState(null);
 
   // 1. Cargar asesores al montar
   useEffect(() => {
@@ -38,7 +41,7 @@ const UsuariosAsesor = () => {
       .catch(err => console.error("Error:", err));
   };
 
-  // 3. Crear usuario
+  // 3. Crear usuario (modo creación)
   const handleCrearUsuario = () => {
     if (!selectedAsesor) {
       setMessage("Selecciona un asesor primero.");
@@ -53,6 +56,7 @@ const UsuariosAsesor = () => {
     })
       .then(() => {
         setMessage("Usuario creado con éxito.");
+        // Limpiar campos
         setNombreUsuario("");
         setEmailUsuario("");
         setPais("");
@@ -63,6 +67,31 @@ const UsuariosAsesor = () => {
         console.error("Error al crear usuario:", err);
         setMessage("Ocurrió un error al crear el usuario.");
       });
+  };
+
+  // 3.b Función para actualizar usuario (modo edición)
+  const handleUpdateUsuario = async () => {
+    try {
+      // Se asume que existe un endpoint PUT para actualizar el usuario
+      await axios.put("/api/usuariosAsesor", {
+        _id: editingUser._id,
+        nombre_asesor: selectedAsesor,
+        nombre_usuario: nombreUsuario,
+        email_usuario: emailUsuario,
+        pais: pais,
+        tipo_negocio: tipoNegocio
+      });
+      setMessage("Usuario actualizado con éxito.");
+      setEditingUser(null);
+      setNombreUsuario("");
+      setEmailUsuario("");
+      setPais("");
+      setTipoNegocio("");
+      handleListarUsuarios();
+    } catch (error) {
+      console.error("Error al actualizar usuario:", error);
+      setMessage("Ocurrió un error al actualizar el usuario.");
+    }
   };
 
   // 4. Carga masiva desde Excel
@@ -116,7 +145,6 @@ const UsuariosAsesor = () => {
       setMessage("Selecciona un asesor primero.");
       return;
     }
-    // Se asume que existe un endpoint para obtener el histórico
     axios.get(`/api/historicoUsuarios?nombre_asesor=${encodeURIComponent(selectedAsesor)}`)
       .then(res => {
         setHistorico(res.data);
@@ -126,6 +154,30 @@ const UsuariosAsesor = () => {
         console.error("Error al obtener histórico:", err);
         setMessage("Ocurrió un error al obtener el histórico.");
       });
+  };
+
+  // 7. Función para editar usuario: llena el formulario con los datos a modificar
+  const handleEdit = (user) => {
+    setEditingUser(user);
+    setNombreUsuario(user.nombre_usuario);
+    setEmailUsuario(user.email_usuario);
+    setPais(user.pais);
+    setTipoNegocio(user.tipo_negocio);
+  };
+
+  // 8. Función para eliminar usuario
+  const handleDelete = async (userId) => {
+    if (!window.confirm("¿Estás seguro de eliminar este usuario?")) return;
+    try {
+      // Se asume que existe un endpoint DELETE para eliminar el usuario,
+      // en este ejemplo se envía el id como query parameter.
+      await axios.delete(`/api/usuariosAsesor?_id=${userId}`);
+      setMessage("Usuario eliminado correctamente.");
+      handleListarUsuarios();
+    } catch (error) {
+      console.error("Error al eliminar usuario:", error);
+      setMessage("Error al eliminar usuario.");
+    }
   };
 
   return (
@@ -162,7 +214,7 @@ const UsuariosAsesor = () => {
         </button>
       </div>
 
-      {/* Formulario para crear usuario */}
+      {/* Formulario para crear o editar usuario */}
       <div className="usuarios-asesor-form">
         <input
           className="usuarios-asesor-input"
@@ -179,13 +231,12 @@ const UsuariosAsesor = () => {
           onChange={(e) => setEmailUsuario(e.target.value)}
         />
         <input
-        className="usuarios-asesor-input"
-        type="text"
-        placeholder="País (ej. US, EC)"
-        value={pais}
-        onChange={(e) => setPais(e.target.value.toUpperCase())}
+          className="usuarios-asesor-input"
+          type="text"
+          placeholder="País (ej. US, EC)"
+          value={pais}
+          onChange={(e) => setPais(e.target.value.toUpperCase())}
         />
-
         <input
           className="usuarios-asesor-input"
           type="text"
@@ -193,35 +244,44 @@ const UsuariosAsesor = () => {
           value={tipoNegocio}
           onChange={(e) => setTipoNegocio(e.target.value)}
         />
-        <button
-          className="usuarios-asesor-button"
-          onClick={handleCrearUsuario}
-        >
-          Crear Usuario
-        </button>
+        {editingUser ? (
+          <button
+            className="usuarios-asesor-button"
+            onClick={handleUpdateUsuario}
+          >
+            Actualizar Usuario
+          </button>
+        ) : (
+          <button
+            className="usuarios-asesor-button"
+            onClick={handleCrearUsuario}
+          >
+            Crear Usuario
+          </button>
+        )}
       </div>
 
       {/* Carga masiva por Excel */}
       <div className="usuarios-asesor-mass-upload">
-      <h3>Carga Masiva</h3>
-      <button
-        className="usuarios-asesor-button"
-        onClick={handleDescargarFormato}
-      >
-        Descargar Formato
-      </button>
-      <label className="usuarios-asesor-button file-label">
-        Elegir Archivo
-        <input
-          type="file"
-          accept=".xlsx,.xls"
-          onChange={handleFileUpload}
-          style={{ display: 'none' }}
-        />
-      </label>
+        <h3>Carga Masiva</h3>
+        <button
+          className="usuarios-asesor-button"
+          onClick={handleDescargarFormato}
+        >
+          Descargar Formato
+        </button>
+        <label className="usuarios-asesor-button file-label">
+          Elegir Archivo
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleFileUpload}
+            style={{ display: "none" }}
+          />
+        </label>
       </div>
 
-      {/* Tabla de usuarios o histórico según corresponda */}
+      {/* Tabla de usuarios (cuando no se muestra el histórico) */}
       {!historicoVisible && (
         <table className="usuarios-asesor-table">
           <thead>
@@ -230,6 +290,7 @@ const UsuariosAsesor = () => {
               <th>Email</th>
               <th>País</th>
               <th>Tipo de Negocio</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -239,49 +300,64 @@ const UsuariosAsesor = () => {
                 <td>{u.email_usuario}</td>
                 <td>{u.pais}</td>
                 <td>{u.tipo_negocio}</td>
+                <td>
+                  <button
+                    className="usuarios-asesor-button action-button"
+                    onClick={() => handleEdit(u)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="usuarios-asesor-button action-button"
+                    onClick={() => handleDelete(u._id)}
+                  >
+                    Eliminar
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
 
-{historicoVisible && (
-  <div>
-    <h3>Histórico de Usuarios</h3>
-    <table className="usuarios-asesor-table">
-      <thead>
-        <tr>
-          <th>Nombre Usuario</th>
-          <th>Email Usuario</th>
-          <th>Producto</th>
-          <th>Fecha</th>
-          <th>Url</th>
-          <th>pdf</th>
-        </tr>
-      </thead>
-      <tbody>
-        {historico.map((item) => (
-          <tr key={item._id}>
-            <td>{item.nombre_usuario}</td>
-            <td>{item.email_usuario}</td>
-            <td>{item.nombre_producto}</td>
-            <td>{item.fecha}</td>
-            <td>
-              <a href={item.url_actual} target="_blank" rel="noopener noreferrer">
-                🔗
-              </a>
-            </td>
-            <td>
-              <a href={item.url_link} target="_blank" rel="noopener noreferrer">
-                📄
-              </a>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-)}
+      {/* Tabla del histórico de usuarios */}
+      {historicoVisible && (
+        <div>
+          <h3>Histórico de Usuarios</h3>
+          <table className="usuarios-asesor-table">
+            <thead>
+              <tr>
+                <th>Nombre Usuario</th>
+                <th>Email Usuario</th>
+                <th>Producto</th>
+                <th>Fecha</th>
+                <th>Url</th>
+                <th>pdf</th>
+              </tr>
+            </thead>
+            <tbody>
+              {historico.map((item) => (
+                <tr key={item._id}>
+                  <td>{item.nombre_usuario}</td>
+                  <td>{item.email_usuario}</td>
+                  <td>{item.nombre_producto}</td>
+                  <td>{item.fecha}</td>
+                  <td>
+                    <a href={item.url_actual} target="_blank" rel="noopener noreferrer">
+                      🔗
+                    </a>
+                  </td>
+                  <td>
+                    <a href={item.url_link} target="_blank" rel="noopener noreferrer">
+                      📄
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
     </div>
   );
