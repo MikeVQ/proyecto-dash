@@ -1,4 +1,3 @@
-// UsuariosAsesor.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
@@ -35,6 +34,11 @@ const UsuariosAsesor = () => {
       .then(res => setAsesores(res.data))
       .catch(err => console.error("Error:", err));
   }, []);
+
+  // Botón para regresar
+  const handleBack = () => {
+    window.history.back();
+  };
 
   // 2. Listar usuarios de un asesor
   const handleListarUsuarios = () => {
@@ -178,14 +182,13 @@ const UsuariosAsesor = () => {
     setTipoNegocio(user.tipo_negocio);
   };
 
-  // 8. Función para abrir modal de eliminación
+  // 8. Modal de eliminación
   const handleDelete = (userId) => {
     setDeleteUserId(userId);
     setDeleteConfirmationText("");
     setDeleteModalVisible(true);
   };
 
-  // Funciones para el modal de eliminación
   const confirmDelete = async () => {
     if (deleteConfirmationText !== "DELETE") {
       alert("La palabra ingresada no es correcta.");
@@ -211,11 +214,33 @@ const UsuariosAsesor = () => {
     setDeleteConfirmationText("");
   };
 
+  // 9. Botón para refrescar tabla
+  const handleRefresh = () => {
+    handleListarUsuarios();
+  };
+
   return (
     <div className="usuarios-asesor-container">
-      <h2 className="usuarios-asesor-title">Asignar Usuarios a Asesor</h2>
+      
+      {/* Encabezado con botón de regresar */}
+      <div className="title-row">
+        <h2 className="usuarios-asesor-title">Asignar Usuarios a Asesor</h2>
+        <button className="usuarios-asesor-button back-button" onClick={handleBack}>
+          Regresar
+        </button>
+      </div>
+
+      {/* Mensajes de éxito o error */}
       {message && (
-        <p className={`usuarios-asesor-message ${messageType === "success" ? "message-success" : messageType === "error" ? "message-error" : ""}`}>
+        <p
+          className={`usuarios-asesor-message ${
+            messageType === "success"
+              ? "message-success"
+              : messageType === "error"
+              ? "message-error"
+              : ""
+          }`}
+        >
           {message}
         </p>
       )}
@@ -228,23 +253,17 @@ const UsuariosAsesor = () => {
           onChange={(e) => setSelectedAsesor(e.target.value)}
         >
           <option value="">Selecciona un asesor</option>
-          {asesores.map(asesor => (
+          {asesores.map((asesor) => (
             <option key={asesor._id} value={asesor.nombre_asesor}>
               {asesor.nombre_asesor}
             </option>
           ))}
         </select>
 
-        <button
-          className="usuarios-asesor-button"
-          onClick={handleListarUsuarios}
-        >
+        <button className="usuarios-asesor-button" onClick={handleListarUsuarios}>
           Listar Usuarios
         </button>
-        <button
-          className="usuarios-asesor-button"
-          onClick={handleHistoricoUsuarios}
-        >
+        <button className="usuarios-asesor-button" onClick={handleHistoricoUsuarios}>
           Histórico de Usuarios
         </button>
       </div>
@@ -280,40 +299,37 @@ const UsuariosAsesor = () => {
           onChange={(e) => setTipoNegocio(e.target.value)}
         />
         {editingUser ? (
-          <button
-            className="usuarios-asesor-button"
-            onClick={handleUpdateUsuario}
-          >
+          <button className="usuarios-asesor-button" onClick={handleUpdateUsuario}>
             Actualizar Usuario
           </button>
         ) : (
-          <button
-            className="usuarios-asesor-button"
-            onClick={handleCrearUsuario}
-          >
+          <button className="usuarios-asesor-button" onClick={handleCrearUsuario}>
             Crear Usuario
           </button>
         )}
       </div>
 
-      {/* Carga masiva por Excel */}
+      {/* Carga masiva por Excel y botón para refrescar */}
       <div className="usuarios-asesor-mass-upload">
-        <h3>Carga Masiva</h3>
-        <button
-          className="usuarios-asesor-button"
-          onClick={handleDescargarFormato}
-        >
-          Descargar Formato
+        <div className="mass-upload-left">
+          <h3>Carga Masiva</h3>
+          <button className="usuarios-asesor-button" onClick={handleDescargarFormato}>
+            Descargar Formato
+          </button>
+          <label className="usuarios-asesor-button file-label">
+            Elegir Archivo
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleFileUpload}
+              style={{ display: "none" }}
+            />
+          </label>
+        </div>
+        
+        <button className="usuarios-asesor-button refresh-button" onClick={handleRefresh}>
+          Refrescar Tabla
         </button>
-        <label className="usuarios-asesor-button file-label">
-          Elegir Archivo
-          <input
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={handleFileUpload}
-            style={{ display: "none" }}
-          />
-        </label>
       </div>
 
       {/* Tabla de usuarios (cuando no se muestra el histórico) */}
@@ -336,18 +352,20 @@ const UsuariosAsesor = () => {
                 <td>{u.pais}</td>
                 <td>{u.tipo_negocio}</td>
                 <td>
-                  <button
-                    className="usuarios-asesor-button editar-button"
-                    onClick={() => handleEdit(u)}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    className="usuarios-asesor-button eliminar-button"
-                    onClick={() => handleDelete(u._id)}
-                  >
-                    Eliminar
-                  </button>
+                  <div className="action-buttons">
+                    <button
+                      className="usuarios-asesor-button editar-button"
+                      onClick={() => handleEdit(u)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      className="usuarios-asesor-button eliminar-button"
+                      onClick={() => handleDelete(u._id)}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -422,3 +440,4 @@ const UsuariosAsesor = () => {
 };
 
 export default UsuariosAsesor;
+

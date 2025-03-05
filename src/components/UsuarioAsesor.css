@@ -17,6 +17,56 @@
     color: #333;
 }
 
+/* Título y botón "Regresar" en la misma fila */
+.title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  /* Mensajes de éxito o error */
+  .message-success {
+    background-color: #e0f8e9; /* Fondo verde claro */
+    color: green;
+  }
+  
+  .message-error {
+    background-color: #fce4ec; /* Fondo rosado claro */
+    color: red;
+  }
+  
+  /* Contenedor de la sección de carga masiva */
+  .usuarios-asesor-mass-upload {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px; /* Espacio debajo de la sección */
+  }
+  
+  /* Contenedor para agrupar el texto "Carga Masiva", "Descargar Formato" y "Elegir Archivo" */
+  .mass-upload-left {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  /* Alinear los botones de Editar y Eliminar en la misma fila con espacio */
+  .action-buttons {
+    display: flex;
+    gap: 10px; /* Espacio entre botones */
+  }
+  
+  /* Botón Editar (verde) */
+  .editar-button {
+    background-color: green;
+  }
+  
+  /* Botón Eliminar (rojo) */
+  .eliminar-button {
+    background-color: red;
+  }
+  
+
 /* Mensaje de error o éxito */
 .usuarios-asesor-message {
     background-color: #fce4ec; /* Fondo rosado claro */
