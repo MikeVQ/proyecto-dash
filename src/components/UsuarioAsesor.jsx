@@ -34,17 +34,10 @@ const UsuariosAsesor = () => {
   // Estado para mostrar el pop-up de "Cargando archivo..."
   const [uploadingFile, setUploadingFile] = useState(false);
 
-  // =====================
-  // ELIMINACIÓN POR LOTES
-  // =====================
+  // Estados y lógica para eliminación por lotes
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [batchDeleteModalVisible, setBatchDeleteModalVisible] = useState(false);
   const [batchDeleteConfirmationText, setBatchDeleteConfirmationText] = useState("");
-
-  // =====================
-  // ORDENAR A-Z / Z-A
-  // =====================
-  const [sortOrder, setSortOrder] = useState("asc");
 
   // 1. Cargar asesores al montar
   useEffect(() => {
@@ -64,8 +57,8 @@ const UsuariosAsesor = () => {
     axios.get(`/api/usuariosAsesor?nombre_asesor=${encodeURIComponent(selectedAsesor)}`)
       .then(res => {
         setUsuarios(res.data);
-        setHistoricoVisible(false);
-        setSelectedUsers([]); // Limpia selección
+        setHistoricoVisible(false); // Oculta el histórico si se listan usuarios actuales
+        setSelectedUsers([]);       // Limpia selección en batch
       })
       .catch(err => console.error("Error:", err));
   };
@@ -80,24 +73,28 @@ const UsuariosAsesor = () => {
     axios.post("/api/usuariosAsesor", {
       nombre_asesor: selectedAsesor,
       nombre_usuario: nombreUsuario,
+      // Convertimos el email a minúsculas
       email_usuario: emailUsuario.toLowerCase(),
-      pais,
+      pais: pais,
       tipo_negocio: tipoNegocio
     })
       .then(() => {
         setMessage("Usuario creado con éxito.");
         setMessageType("success");
+        // Limpiar campos
         setNombreUsuario("");
         setEmailUsuario("");
         setPais("");
         setTipoNegocio("");
-        handleListarUsuarios();
+        handleListarUsuarios(); // Refresca la tabla
       })
       .catch(err => {
         if (err.response && err.response.status === 409) {
+          // Usuario duplicado (el endpoint debe retornar 409)
           setMessage("Este usuario ya existe con los mismos campos (duplicado).");
           setMessageType("error");
         } else {
+          // Otro error
           setMessage("Ocurrió un error al crear el usuario.");
           setMessageType("error");
         }
@@ -111,8 +108,9 @@ const UsuariosAsesor = () => {
         _id: editingUser._id,
         nombre_asesor: selectedAsesor,
         nombre_usuario: nombreUsuario,
+        // Convertimos el email a minúsculas
         email_usuario: emailUsuario.toLowerCase(),
-        pais,
+        pais: pais,
         tipo_negocio: tipoNegocio
       });
       setMessage("Usuario actualizado con éxito.");
@@ -135,7 +133,8 @@ const UsuariosAsesor = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    setUploadingFile(true); // Muestra pop-up de "Cargando archivo..."
+    // Muestra el pop-up de "Cargando archivo..."
+    setUploadingFile(true);
 
     try {
       const data = await file.arrayBuffer();
@@ -143,16 +142,20 @@ const UsuariosAsesor = () => {
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(worksheet);
 
+      // Variables para el conteo y duplicados
       let successCount = 0;
       const duplicates = [];
 
       for (const row of rows) {
         try {
+          // Verifica que la fila tenga un asesor
           if (!row.nombre_asesor) {
             console.warn("Fila omitida por no tener nombre_asesor:", row);
             continue;
           }
+
           await axios.post("/api/usuariosAsesor", {
+            // Usamos el nombre_asesor directamente desde la fila
             nombre_asesor: row.nombre_asesor,
             nombre_usuario: row.nombre_usuario,
             email_usuario: row.email_usuario
@@ -161,9 +164,11 @@ const UsuariosAsesor = () => {
             pais: row.pais ? row.pais.toUpperCase() : "",
             tipo_negocio: row.tipo_negocio
           });
+
           successCount++;
         } catch (error) {
           if (error.response && error.response.status === 409) {
+            // Guardamos el registro completo para reportarlo luego
             duplicates.push({
               nombre_asesor: row.nombre_asesor,
               nombre_usuario: row.nombre_usuario,
@@ -177,34 +182,41 @@ const UsuariosAsesor = () => {
         }
       }
 
+      // Mensaje final según los resultados
       if (successCount === 0 && duplicates.length === 0) {
+        // Posiblemente el Excel estaba vacío o todo falló por otro motivo
         setMessage("No se insertaron usuarios. Verifica tu archivo o revisa los errores en consola.");
         setMessageType("error");
         setDuplicatedUsers([]);
       } else if (duplicates.length > 0) {
+        // Éxito parcial
         setMessage(
           `Se subieron ${successCount} usuario(s) con éxito. Se omitieron ${duplicates.length} por duplicados.`
         );
         setMessageType("success");
         setDuplicatedUsers(duplicates);
       } else {
+        // No hubo duplicados
         setMessage(`Usuarios cargados exitosamente. Total insertados: ${successCount}.`);
         setMessageType("success");
         setDuplicatedUsers([]);
       }
 
+      // Refrescar la tabla (opcional)
       handleListarUsuarios();
     } catch (error) {
       console.error("Error leyendo archivo Excel:", error);
       setMessage("Error al procesar el archivo Excel.");
       setMessageType("error");
     } finally {
-      setUploadingFile(false); // Cierra pop-up
+      // Se cierra el pop-up de "Cargando archivo..."
+      setUploadingFile(false);
     }
   };
 
   // 5. Descargar formato para carga masiva
   const handleDescargarFormato = () => {
+    // Incluimos "nombre_asesor" al inicio
     const headers = [
       "nombre_asesor",
       "nombre_usuario",
@@ -238,7 +250,7 @@ const UsuariosAsesor = () => {
       });
   };
 
-  // 7. Función para editar usuario
+  // 7. Función para editar usuario: llena el formulario con los datos a modificar
   const handleEdit = (user) => {
     setEditingUser(user);
     setNombreUsuario(user.nombre_usuario);
@@ -253,6 +265,7 @@ const UsuariosAsesor = () => {
     setDeleteConfirmationText("");
     setDeleteModalVisible(true);
   };
+
   const confirmDelete = async () => {
     if (deleteConfirmationText !== "DELETE") {
       alert("La palabra ingresada no es correcta.");
@@ -271,6 +284,7 @@ const UsuariosAsesor = () => {
       setDeleteModalVisible(false);
     }
   };
+
   const cancelDelete = () => {
     setDeleteModalVisible(false);
     setDeleteUserId(null);
@@ -282,30 +296,34 @@ const UsuariosAsesor = () => {
     handleListarUsuarios();
   };
 
-  // ============================
-  //     ELIMINACIÓN POR LOTES
-  // ============================
+  // ============ ELIMINACIÓN POR LOTES (CON POP-UP) ============
+
+  // Almacenar y actualizar la selección de checkboxes
   const handleCheckboxChange = (userId) => {
-    setSelectedUsers((prev) => {
-      if (prev.includes(userId)) {
-        return prev.filter((id) => id !== userId);
+    setSelectedUsers((prevSelected) => {
+      if (prevSelected.includes(userId)) {
+        // Quitar de la selección
+        return prevSelected.filter((id) => id !== userId);
       } else {
-        return [...prev, userId];
+        // Agregar a la selección
+        return [...prevSelected, userId];
       }
     });
   };
 
+  // Seleccionar / deseleccionar todos
   const handleSelectAll = (e) => {
     if (e.target.checked) {
+      // Seleccionar todos
       const allIds = usuarios.map((u) => u._id);
       setSelectedUsers(allIds);
     } else {
+      // Deseleccionar todos
       setSelectedUsers([]);
     }
   };
 
-  const [batchDeleteModalVisible, setBatchDeleteModalVisible] = useState(false);
-
+  // Abre el pop-up para confirmar la eliminación de varios usuarios
   const openBatchDeleteModal = () => {
     if (selectedUsers.length === 0) {
       alert("No has seleccionado ningún usuario para eliminar.");
@@ -315,13 +333,13 @@ const UsuariosAsesor = () => {
     setBatchDeleteModalVisible(true);
   };
 
-  const [batchDeleteConfirmationText, setBatchDeleteConfirmationText] = useState("");
-
+  // Cierra el pop-up de eliminación por lotes
   const cancelBatchDelete = () => {
     setBatchDeleteModalVisible(false);
     setBatchDeleteConfirmationText("");
   };
 
+  // Confirma la eliminación por lotes (si el usuario escribe "DELETE")
   const confirmBatchDelete = async () => {
     if (batchDeleteConfirmationText !== "DELETE") {
       alert("La palabra ingresada no es correcta.");
@@ -344,29 +362,8 @@ const UsuariosAsesor = () => {
     }
   };
 
-  // ============================
-  //       ORDENAR A-Z / Z-A
-  // ============================
-  const [sortOrder, setSortOrder] = useState("asc");
-
-  const handleToggleSortOrder = () => {
-    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-  };
-
-  const sortedUsuarios = [...usuarios].sort((a, b) => {
-    const nameA = a.nombre_usuario.toLowerCase();
-    const nameB = b.nombre_usuario.toLowerCase();
-    if (nameA < nameB) return sortOrder === "asc" ? -1 : 1;
-    if (nameA > nameB) return sortOrder === "asc" ? 1 : -1;
-    return 0;
-  });
-
-  // ============================
-  //       RENDER
-  // ============================
   return (
     <div className="usuarios-asesor-container">
-
       {/* Pop-up de "Cargando archivo..." */}
       {uploadingFile && (
         <div className="modal-overlay">
@@ -394,30 +391,6 @@ const UsuariosAsesor = () => {
                 Confirmar
               </button>
               <button className="usuarios-asesor-button" onClick={cancelBatchDelete}>
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de confirmación de eliminación individual */}
-      {deleteModalVisible && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3>Confirmar eliminación</h3>
-            <p>Para confirmar la eliminación, escribe "DELETE"</p>
-            <input
-              type="text"
-              value={deleteConfirmationText}
-              onChange={(e) => setDeleteConfirmationText(e.target.value)}
-              placeholder='Escribe "DELETE"'
-            />
-            <div className="modal-buttons">
-              <button className="usuarios-asesor-button" onClick={confirmDelete}>
-                Confirmar
-              </button>
-              <button className="usuarios-asesor-button" onClick={cancelDelete}>
                 Cancelar
               </button>
             </div>
@@ -477,7 +450,7 @@ const UsuariosAsesor = () => {
         </div>
       )}
 
-      {/* Fila de botones para seleccionar asesor y vistas */}
+      {/* Seleccionar asesor */}
       <div className="usuarios-asesor-select-row">
         <select
           className="usuarios-asesor-select"
@@ -568,25 +541,78 @@ const UsuariosAsesor = () => {
         </button>
       </div>
 
-      {/* Botones para eliminar por lotes y ordenar A-Z / Z-A */}
+      {/* Botón para eliminar varios usuarios a la vez */}
       {!historicoVisible && usuarios.length > 0 && (
-        <div style={{ marginBottom: "10px" }}>
-          <button
-            className="usuarios-asesor-button eliminar-button"
-            onClick={openBatchDeleteModal}
-            style={{ marginRight: "10px" }}
-          >
-            Eliminar seleccionados
-          </button>
-          <button className="usuarios-asesor-button" onClick={handleToggleSortOrder}>
-            {sortOrder === "asc" ? "Ordenar Z-A" : "Ordenar A-Z"}
-          </button>
-        </div>
+        <button
+          className="usuarios-asesor-button eliminar-button"
+          onClick={openBatchDeleteModal}
+          style={{ marginBottom: "10px" }}
+        >
+          Eliminar seleccionados
+        </button>
       )}
 
-      {/* Tabla de usuarios o histórico */}
-      {historicoVisible ? (
-        /* HISTÓRICO */
+      {/* Tabla de usuarios (cuando no se muestra el histórico) */}
+      {!historicoVisible && (
+        <table className="usuarios-asesor-table">
+          <thead>
+            <tr>
+              {/* Checkbox para seleccionar/deseleccionar todos */}
+              <th>
+                <input
+                  type="checkbox"
+                  onChange={handleSelectAll}
+                  checked={
+                    selectedUsers.length === usuarios.length &&
+                    usuarios.length > 0
+                  }
+                />
+              </th>
+              <th>Nombre Usuario</th>
+              <th>Email</th>
+              <th>País</th>
+              <th>Tipo de Negocio</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {usuarios.map((u) => (
+              <tr key={u._id}>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={selectedUsers.includes(u._id)}
+                    onChange={() => handleCheckboxChange(u._id)}
+                  />
+                </td>
+                <td>{u.nombre_usuario}</td>
+                <td>{u.email_usuario}</td>
+                <td>{u.pais}</td>
+                <td>{u.tipo_negocio}</td>
+                <td>
+                  <div className="action-buttons">
+                    <button
+                      className="usuarios-asesor-button editar-button"
+                      onClick={() => handleEdit(u)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      className="usuarios-asesor-button eliminar-button"
+                      onClick={() => handleDelete(u._id)}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {/* Tabla del histórico de usuarios */}
+      {historicoVisible && (
         <div>
           <h3>Histórico de Usuarios</h3>
           <table className="usuarios-asesor-table">
@@ -622,63 +648,30 @@ const UsuariosAsesor = () => {
             </tbody>
           </table>
         </div>
-      ) : (
-        /* USUARIOS NORMALES */
-        <table className="usuarios-asesor-table">
-          <thead>
-            <tr>
-              {/* Checkbox para seleccionar/deseleccionar todos */}
-              <th>
-                <input
-                  type="checkbox"
-                  onChange={handleSelectAll}
-                  checked={
-                    selectedUsers.length === usuarios.length &&
-                    usuarios.length > 0
-                  }
-                />
-              </th>
-              <th>Nombre Usuario</th>
-              <th>Email</th>
-              <th>País</th>
-              <th>Tipo de Negocio</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedUsuarios.map((u) => (
-              <tr key={u._id}>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={selectedUsers.includes(u._id)}
-                    onChange={() => handleCheckboxChange(u._id)}
-                  />
-                </td>
-                <td>{u.nombre_usuario}</td>
-                <td>{u.email_usuario}</td>
-                <td>{u.pais}</td>
-                <td>{u.tipo_negocio}</td>
-                <td>
-                  <div className="action-buttons">
-                    <button
-                      className="usuarios-asesor-button editar-button"
-                      onClick={() => handleEdit(u)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      className="usuarios-asesor-button eliminar-button"
-                      onClick={() => handleDelete(u._id)}
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      )}
+
+      {/* Modal de confirmación de eliminación individual */}
+      {deleteModalVisible && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Confirmar eliminación</h3>
+            <p>Para confirmar la eliminación, escribe "DELETE"</p>
+            <input
+              type="text"
+              value={deleteConfirmationText}
+              onChange={(e) => setDeleteConfirmationText(e.target.value)}
+              placeholder='Escribe "DELETE"'
+            />
+            <div className="modal-buttons">
+              <button className="usuarios-asesor-button" onClick={confirmDelete}>
+                Confirmar
+              </button>
+              <button className="usuarios-asesor-button" onClick={cancelDelete}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
