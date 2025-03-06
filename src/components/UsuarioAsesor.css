@@ -9,6 +9,18 @@
     padding: 20px;
 }
 
+/* Contenedor especial para la tabla de "Todos los Usuarios"
+   Este contenedor rompe con el max-width del padre para mostrar la tabla completa */
+.all-users-table-container {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    padding: 0 20px; /* Opcional: espacio lateral para que la tabla no toque los bordes del viewport */
+}
+
 /* Título */
 .usuarios-asesor-title {
     text-align: center;
@@ -16,74 +28,67 @@
     font-size: 1.8rem;
     color: #333;
 }
-.usuarios-asesor-table-wrapper {
-    width: 100%;
-    margin: 0 auto;       /* Centra el contenedor */
-    overflow-x: auto;     /* Activa el scroll horizontal si la tabla es demasiado ancha */
-  }
-  
 
-/* Título y botón "Regresar" en la misma fila */
+/* Fila para el título y botón "Regresar" */
 .title-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
-  
-  /* Mensajes de éxito o error */
-  .message-success {
+}
+
+/* Mensajes de éxito o error */
+.message-success {
     background-color: #e0f8e9; /* Fondo verde claro */
     color: green;
-  }
-  
-  .message-error {
+}
+
+.message-error {
     background-color: #fce4ec; /* Fondo rosado claro */
     color: red;
-  }
-  
-  /* Contenedor de la sección de carga masiva */
-  .usuarios-asesor-mass-upload {
+}
+
+/* Contenedor de la sección de carga masiva */
+.usuarios-asesor-mass-upload {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px; /* Espacio debajo de la sección */
-  }
-  
-  /* Contenedor para agrupar el texto "Carga Masiva", "Descargar Formato" y "Elegir Archivo" */
-  .mass-upload-left {
+    margin-bottom: 20px;
+}
+
+/* Contenedor para agrupar “Carga Masiva”, “Descargar Formato” y “Elegir Archivo” */
+.mass-upload-left {
     display: flex;
     gap: 10px;
     align-items: center;
-  }
-  
-  /* Alinear los botones de Editar y Eliminar en la misma fila con espacio */
-  .action-buttons {
-    display: flex;
-    gap: 10px; /* Espacio entre botones */
-  }
-  
-  /* Botón Editar (verde) */
-  .editar-button {
-    background-color: green;
-  }
-  
-  /* Botón Eliminar (rojo) */
-  .eliminar-button {
-    background-color: red;
-  }
-  
+}
 
-/* Mensaje de error o éxito */
+/* Alinear los botones de Editar y Eliminar */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* Botón Editar */
+.editar-button {
+    background-color: green;
+}
+
+/* Botón Eliminar */
+.eliminar-button {
+    background-color: red;
+}
+
+/* Mensaje de error o éxito (estilo general) */
 .usuarios-asesor-message {
-    background-color: #fce4ec; /* Fondo rosado claro */
-    color: #d32f2f; /* Texto rojo */
+    background-color: #fce4ec;
+    color: #d32f2f;
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 20px;
     text-align: center;
 }
 
-/* Fila para select + botón */
+/* Fila para select y botones */
 .usuarios-asesor-select-row {
     display: flex;
     align-items: center;
@@ -97,8 +102,8 @@
     border-radius: 6px;
     border: 1px solid #ccc;
     min-width: 200px;
-    background-color: #fff !important; /* Asegura que el fondo sea blanco */
-    color: #000 !important; /* Asegura que el texto sea negro */
+    background-color: #fff !important;
+    color: #000 !important;
     font-size: 1rem;
 }
 
@@ -118,7 +123,7 @@
     background: #357abd;
 }
 
-/* Formulario para crear usuario */
+/* Formulario para crear/editar usuario */
 .usuarios-asesor-form {
     display: flex;
     flex-wrap: wrap;
@@ -132,12 +137,11 @@
     border-radius: 6px;
     border: 1px solid #ccc;
     flex: 1 1 200px;
-    background-color: #fff !important; /* Fondo blanco */
-    color: #000 !important; /* Texto negro */
+    background-color: #fff !important;
+    color: #000 !important;
     font-size: 1rem;
 }
 
-/* Asegura que los inputs no se oscurezcan en modo oscuro */
 .usuarios-asesor-input:focus {
     background-color: #fff;
     color: #000;
@@ -145,12 +149,11 @@
     outline: none;
 }
 
-/* Placeholder más visible */
 .usuarios-asesor-input::placeholder {
-    color: #777 !important; /* Un gris más claro para mayor legibilidad */
+    color: #777 !important;
 }
 
-/* Contenedor de carga masiva */
+/* Contenedor de carga masiva adicional */
 .usuarios-asesor-mass-upload {
     margin-bottom: 20px;
 }
@@ -158,44 +161,56 @@
 .file-label {
     margin-left: 10px;
     cursor: pointer;
-  }
+}
 
-/* Input para subir archivo */
 .usuarios-asesor-file {
     margin-top: 10px;
 }
 
+/* ----- ESTILOS DE LA TABLA ----- */
+
+/* Estilo general de la tabla de usuarios */
 .usuarios-asesor-table {
+    /* Para la vista normal se usa width: 100% (limitada por el contenedor padre);
+       en "Todos los Usuarios" la tabla se mostrará dentro de .all-users-table-container */
+    width: 100%;
     border-collapse: collapse;
     background-color: #fff;
     border-radius: 8px;
     overflow: hidden;
-    
-    /* Quita width: 100% y añade lo siguiente: */
-    width: auto;       /* La tabla se ajusta al ancho de su contenido */
-    margin: 0 auto;    /* Centra la tabla dentro de su contenedor padre */
-  }
+    table-layout: auto;
+    margin: 0 auto;
+}
 
-.message-success {
-    background-color: #e0f8e9; /* Fondo verde claro */
-    color: green;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  .message-error {
-    background-color: #fce4ec; /* Fondo rosado claro */
-    color: red;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
+/* Reducir padding en celdas para disminuir el espacio entre columnas */
+.usuarios-asesor-table th,
+.usuarios-asesor-table td {
+    padding: 6px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
 
-/* Modal overlay para centrar el pop up con fondo semitransparente */
+/* Encabezado de la tabla */
+.usuarios-asesor-table th {
+    background-color: #4d96ff;
+    color: #fff;
+}
+
+/* Filas alternas */
+.usuarios-asesor-table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+/* Hover en filas */
+.usuarios-asesor-table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+/* ----- MODAL ----- */
+
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -207,77 +222,47 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
-  }
-  
-  /* Contenedor del modal */
-  .modal {
+}
+
+.modal {
     background: #fff;
     padding: 20px;
     border-radius: 8px;
     width: 300px;
     text-align: center;
-  }
-  
-  /* Estilo para el input del modal */
-  .modal input[type="text"] {
+}
+
+.modal input[type="text"] {
     background-color: #fff;
     color: #000;
-    border: 1px solid #ccc; /* Opcional: define un borde */
+    border: 1px solid #ccc;
     padding: 8px;
     margin: 10px 0;
     width: 80%;
-  }
-  
-  
-  /* Contenedor de botones dentro del modal */
-  .modal-buttons {
+}
+
+.modal-buttons {
     margin-top: 15px;
     display: flex;
     justify-content: space-around;
-  }
+}
 
-  
-/* Botón Editar en color verde */
+/* Botones específicos en el modal */
 .usuarios-asesor-button.editar-button {
     background-color: green;
-    margin-right: 10px;  /* Espacio a la derecha */
-  }
-  
-  /* Botón Eliminar en color rojo */
-  .usuarios-asesor-button.eliminar-button {
+    margin-right: 10px;
+}
+
+.usuarios-asesor-button.eliminar-button {
     background-color: red;
-  }
-
-  
-.usuarios-asesor-table th,
-.usuarios-asesor-table td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
 }
 
-/* Encabezado de la tabla */
-.usuarios-asesor-table th {
-    background-color: #4d96ff;
-    color: #fff;
-}
+/* ----- RESPONSIVIDAD ----- */
 
-/* Filas alternas para mayor claridad */
-.usuarios-asesor-table tbody tr:nth-child(even) {
-    background-color: #f8f9fa;
-}
-
-/* Asegurar que las filas tengan buena separación */
-.usuarios-asesor-table tbody tr:hover {
-    background-color: #e9ecef;
-}
-
-/* Ajustar el tamaño de los inputs en pantallas pequeñas */
 @media (max-width: 768px) {
     .usuarios-asesor-form {
         flex-direction: column;
     }
-    
     .usuarios-asesor-input {
         width: 100%;
     }

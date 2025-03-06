@@ -35,7 +35,7 @@ const UsuariosAsesor = () => {
 
   const [sortOrder, setSortOrder] = useState("asc");
 
-  // 1. Cargar asesores al montar
+  // Cargar asesores al montar
   useEffect(() => {
     axios
       .get("/api/asesores")
@@ -48,7 +48,7 @@ const UsuariosAsesor = () => {
     window.history.back();
   };
 
-  // 2. Listar usuarios de un asesor
+  // Listar usuarios de un asesor
   const handleListarUsuarios = () => {
     if (!selectedAsesor) return;
     axios
@@ -62,7 +62,7 @@ const UsuariosAsesor = () => {
       .catch((err) => console.error("Error:", err));
   };
 
-  // 2.b Listar TODOS los usuarios (sin filtrar por asesor)
+  // Listar TODOS los usuarios (modo "Todos")
   const handleListarTodosLosUsuarios = () => {
     axios
       .get("/api/usuariosAsesor?all=true")
@@ -79,7 +79,7 @@ const UsuariosAsesor = () => {
       });
   };
 
-  // 3. Crear usuario (modo creación)
+  // Crear usuario (modo creación)
   const handleCrearUsuario = () => {
     if (!selectedAsesor) {
       setMessage("Selecciona un asesor primero.");
@@ -92,7 +92,7 @@ const UsuariosAsesor = () => {
         nombre_usuario: nombreUsuario,
         email_usuario: emailUsuario.toLowerCase(),
         pais: pais,
-        tipo_negocio: tipoNegocio
+        tipo_negocio: tipoNegocio,
       })
       .then(() => {
         setMessage("Usuario creado con éxito.");
@@ -114,7 +114,7 @@ const UsuariosAsesor = () => {
       });
   };
 
-  // 3.b Función para actualizar usuario (modo edición)
+  // Actualizar usuario (modo edición)
   const handleUpdateUsuario = async () => {
     try {
       await axios.put("/api/usuariosAsesor", {
@@ -123,7 +123,7 @@ const UsuariosAsesor = () => {
         nombre_usuario: nombreUsuario,
         email_usuario: emailUsuario.toLowerCase(),
         pais: pais,
-        tipo_negocio: tipoNegocio
+        tipo_negocio: tipoNegocio,
       });
       setMessage("Usuario actualizado con éxito.");
       setMessageType("success");
@@ -140,22 +140,18 @@ const UsuariosAsesor = () => {
     }
   };
 
-  // 4. Carga masiva desde Excel
+  // Carga masiva desde Excel
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     setUploadingFile(true);
-
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(worksheet);
-
       let successCount = 0;
       const duplicates = [];
-
       for (const row of rows) {
         try {
           if (!row.nombre_asesor) {
@@ -165,11 +161,9 @@ const UsuariosAsesor = () => {
           await axios.post("/api/usuariosAsesor", {
             nombre_asesor: row.nombre_asesor,
             nombre_usuario: row.nombre_usuario,
-            email_usuario: row.email_usuario
-              ? row.email_usuario.toLowerCase()
-              : "",
+            email_usuario: row.email_usuario ? row.email_usuario.toLowerCase() : "",
             pais: row.pais ? row.pais.toUpperCase() : "",
-            tipo_negocio: row.tipo_negocio
+            tipo_negocio: row.tipo_negocio,
           });
           successCount++;
         } catch (error) {
@@ -179,24 +173,19 @@ const UsuariosAsesor = () => {
               nombre_usuario: row.nombre_usuario,
               email_usuario: row.email_usuario,
               pais: row.pais,
-              tipo_negocio: row.tipo_negocio
+              tipo_negocio: row.tipo_negocio,
             });
           } else {
             console.error("Error al crear usuario:", error);
           }
         }
       }
-
       if (successCount === 0 && duplicates.length === 0) {
-        setMessage(
-          "No se insertaron usuarios. Verifica tu archivo o revisa los errores en consola."
-        );
+        setMessage("No se insertaron usuarios. Verifica tu archivo o revisa los errores en consola.");
         setMessageType("error");
         setDuplicatedUsers([]);
       } else if (duplicates.length > 0) {
-        setMessage(
-          `Se subieron ${successCount} usuario(s) con éxito. Se omitieron ${duplicates.length} por duplicados.`
-        );
+        setMessage(`Se subieron ${successCount} usuario(s) con éxito. Se omitieron ${duplicates.length} por duplicados.`);
         setMessageType("success");
         setDuplicatedUsers(duplicates);
       } else {
@@ -204,7 +193,6 @@ const UsuariosAsesor = () => {
         setMessageType("success");
         setDuplicatedUsers([]);
       }
-
       handleListarUsuarios();
     } catch (error) {
       console.error("Error leyendo archivo Excel:", error);
@@ -215,22 +203,16 @@ const UsuariosAsesor = () => {
     }
   };
 
-  // 5. Descargar formato para carga masiva
+  // Descargar formato para carga masiva
   const handleDescargarFormato = () => {
-    const headers = [
-      "nombre_asesor",
-      "nombre_usuario",
-      "email_usuario",
-      "pais",
-      "tipo_negocio"
-    ];
+    const headers = ["nombre_asesor", "nombre_usuario", "email_usuario", "pais", "tipo_negocio"];
     const ws = XLSX.utils.aoa_to_sheet([headers]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Formato");
     XLSX.writeFile(wb, "formatoUsuarios.xlsx");
   };
 
-  // 6. Obtener histórico de usuarios
+  // Obtener histórico de usuarios
   const handleHistoricoUsuarios = () => {
     if (!selectedAsesor) {
       setMessage("Selecciona un asesor primero.");
@@ -252,7 +234,7 @@ const UsuariosAsesor = () => {
       });
   };
 
-  // 7. Función para editar usuario
+  // Función para editar usuario
   const handleEdit = (user) => {
     setEditingUser(user);
     setNombreUsuario(user.nombre_usuario);
@@ -261,12 +243,13 @@ const UsuariosAsesor = () => {
     setTipoNegocio(user.tipo_negocio);
   };
 
-  // 8. Modal de eliminación individual
+  // Modal de eliminación individual
   const handleDelete = (userId) => {
     setDeleteUserId(userId);
     setDeleteConfirmationText("");
     setDeleteModalVisible(true);
   };
+
   const confirmDelete = async () => {
     if (deleteConfirmationText !== "DELETE") {
       alert("La palabra ingresada no es correcta.");
@@ -285,18 +268,19 @@ const UsuariosAsesor = () => {
       setDeleteModalVisible(false);
     }
   };
+
   const cancelDelete = () => {
     setDeleteModalVisible(false);
     setDeleteUserId(null);
     setDeleteConfirmationText("");
   };
 
-  // 9. Botón para refrescar tabla
+  // Botón para refrescar tabla
   const handleRefresh = () => {
     handleListarUsuarios();
   };
 
-  // ============ ELIMINACIÓN POR LOTES (CON POP-UP) ============
+  // Eliminación por lotes
   const handleCheckboxChange = (userId) => {
     setSelectedUsers((prevSelected) => {
       if (prevSelected.includes(userId)) {
@@ -306,6 +290,7 @@ const UsuariosAsesor = () => {
       }
     });
   };
+
   const handleSelectAll = (e) => {
     if (e.target.checked) {
       const allIds = usuarios.map((u) => u._id);
@@ -314,6 +299,7 @@ const UsuariosAsesor = () => {
       setSelectedUsers([]);
     }
   };
+
   const openBatchDeleteModal = () => {
     if (selectedUsers.length === 0) {
       alert("No has seleccionado ningún usuario para eliminar.");
@@ -322,10 +308,12 @@ const UsuariosAsesor = () => {
     setBatchDeleteConfirmationText("");
     setBatchDeleteModalVisible(true);
   };
+
   const cancelBatchDelete = () => {
     setBatchDeleteModalVisible(false);
     setBatchDeleteConfirmationText("");
   };
+
   const confirmBatchDelete = async () => {
     if (batchDeleteConfirmationText !== "DELETE") {
       alert("La palabra ingresada no es correcta.");
@@ -333,7 +321,7 @@ const UsuariosAsesor = () => {
     }
     try {
       const res = await axios.post("/api/usuariosAsesor/batchDelete", {
-        ids: selectedUsers
+        ids: selectedUsers,
       });
       setMessage(res.data.message || "Usuarios eliminados correctamente.");
       setMessageType("success");
@@ -348,29 +336,27 @@ const UsuariosAsesor = () => {
     }
   };
 
-  // ============ ORDENAR A-Z / Z-A ============
+  // Ordenar A-Z / Z-A
   const handleToggleSortOrder = () => {
     setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
   };
-  
-  // Ordenamos usuarios antes de renderizar la tabla
-    const sortedUsuarios = [...usuarios].sort((a, b) => {
-      if (allUsersMode) {
-        // Ordenar por el nombre del asesor (que viene en asesorData.nombre_asesor)
-        const asesorA = (a.asesorData?.nombre_asesor || "").toLowerCase();
-        const asesorB = (b.asesorData?.nombre_asesor || "").toLowerCase();
-        if (asesorA < asesorB) return sortOrder === "asc" ? -1 : 1;
-        if (asesorA > asesorB) return sortOrder === "asc" ? 1 : -1;
-        return 0;
-      } else {
-        // Ordenar por nombre del usuario (como estaba)
-        const nameA = a.nombre_usuario.toLowerCase();
-        const nameB = b.nombre_usuario.toLowerCase();
-        if (nameA < nameB) return sortOrder === "asc" ? -1 : 1;
-        if (nameA > nameB) return sortOrder === "asc" ? 1 : -1;
-        return 0;
-      }
-    });
+
+  // Ordenamos según el modo: por asesor (Todos los Usuarios) o por nombre de usuario
+  const sortedUsuarios = [...usuarios].sort((a, b) => {
+    if (allUsersMode) {
+      const asesorA = (a.asesorData?.nombre_asesor || "").toLowerCase();
+      const asesorB = (b.asesorData?.nombre_asesor || "").toLowerCase();
+      if (asesorA < asesorB) return sortOrder === "asc" ? -1 : 1;
+      if (asesorA > asesorB) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    } else {
+      const nameA = a.nombre_usuario.toLowerCase();
+      const nameB = b.nombre_usuario.toLowerCase();
+      if (nameA < nameB) return sortOrder === "asc" ? -1 : 1;
+      if (nameA > nameB) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    }
+  });
 
   return (
     <div className="usuarios-asesor-container">
@@ -384,7 +370,7 @@ const UsuariosAsesor = () => {
         </div>
       )}
 
-      {/* Pop-up para confirmación de eliminación por lotes */}
+      {/* Modal para eliminación por lotes */}
       {batchDeleteModalVisible && (
         <div className="modal-overlay">
           <div className="modal">
@@ -418,20 +404,12 @@ const UsuariosAsesor = () => {
 
       {/* Mensajes de éxito o error */}
       {message && (
-        <p
-          className={`usuarios-asesor-message ${
-            messageType === "success"
-              ? "message-success"
-              : messageType === "error"
-              ? "message-error"
-              : ""
-          }`}
-        >
+        <p className={`usuarios-asesor-message ${messageType === "success" ? "message-success" : messageType === "error" ? "message-error" : ""}`}>
           {message}
         </p>
       )}
 
-      {/* Si existen duplicados, mostramos la tabla debajo del mensaje */}
+      {/* Mostrar duplicados si existen */}
       {duplicatedUsers.length > 0 && (
         <div className="duplicated-users-container">
           <h4>Usuarios Duplicados (no se insertaron):</h4>
@@ -531,7 +509,7 @@ const UsuariosAsesor = () => {
         )}
       </div>
 
-      {/* Carga masiva por Excel y botón para refrescar */}
+      {/* Carga masiva y botón para refrescar */}
       <div className="usuarios-asesor-mass-upload">
         <div className="mass-upload-left">
           <h3>Carga Masiva</h3>
@@ -548,57 +526,89 @@ const UsuariosAsesor = () => {
             />
           </label>
         </div>
-
         <button className="usuarios-asesor-button refresh-button" onClick={handleRefresh}>
           Refrescar Tabla
         </button>
       </div>
 
-      {/* Botón para eliminar varios usuarios a la vez */}
-      {!historicoVisible && sortedUsuarios.length > 0 && (
-        <div style={{ marginBottom: "10px" }}>
-          <button
-            className="usuarios-asesor-button eliminar-button"
-            onClick={openBatchDeleteModal}
-            style={{ marginRight: "10px" }}
-          >
-            Eliminar seleccionados
-          </button>
-          <button className="usuarios-asesor-button" onClick={handleToggleSortOrder}>
-            {sortOrder === "asc" ? "Ordenar Z-A" : "Ordenar A-Z"}
-          </button>
-        </div>
-      )}
-
-      {/* Envolvemos la tabla (cuando NO es histórico) en un div con clase "usuarios-asesor-table-wrapper" */}
-      {!historicoVisible && (
-        <div className="usuarios-asesor-table-wrapper">
-          <table className="usuarios-asesor-table">
-            <thead>
-              <tr>
-                <th>
-                  <input
-                    type="checkbox"
-                    onChange={handleSelectAll}
-                    checked={
-                      selectedUsers.length === sortedUsuarios.length &&
-                      sortedUsuarios.length > 0
-                    }
-                  />
-                </th>
-                {allUsersMode && <th>Asesor</th>}
-                <th>Nombre Usuario</th>
-                <th>Email</th>
-                <th>País</th>
-                <th>Tipo de Negocio</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedUsuarios.map((u) => {
-                // Si venimos de "Todos los usuarios", el backend envía "asesorData.nombre_asesor"
-                const asesorName = u.asesorData?.nombre_asesor || "";
-                return (
+      {/* Mostrar tabla según el modo y vista histórica */}
+      {!historicoVisible &&
+        (allUsersMode ? (
+          // Vista de "Todos los Usuarios": usamos el contenedor que expande la tabla al viewport
+          <div className="all-users-table-container">
+            <table className="usuarios-asesor-table">
+              <thead>
+                <tr>
+                  <th>
+                    <input
+                      type="checkbox"
+                      onChange={handleSelectAll}
+                      checked={selectedUsers.length === sortedUsuarios.length && sortedUsuarios.length > 0}
+                    />
+                  </th>
+                  {allUsersMode && <th>Asesor</th>}
+                  <th>Nombre Usuario</th>
+                  <th>Email</th>
+                  <th>País</th>
+                  <th>Tipo de Negocio</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedUsuarios.map((u) => {
+                  const asesorName = u.asesorData?.nombre_asesor || "";
+                  return (
+                    <tr key={u._id}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selectedUsers.includes(u._id)}
+                          onChange={() => handleCheckboxChange(u._id)}
+                        />
+                      </td>
+                      {allUsersMode && <td>{asesorName}</td>}
+                      <td>{u.nombre_usuario}</td>
+                      <td>{u.email_usuario}</td>
+                      <td>{u.pais}</td>
+                      <td>{u.tipo_negocio}</td>
+                      <td>
+                        <div className="action-buttons">
+                          <button className="usuarios-asesor-button editar-button" onClick={() => handleEdit(u)}>
+                            Editar
+                          </button>
+                          <button className="usuarios-asesor-button eliminar-button" onClick={() => handleDelete(u._id)}>
+                            Eliminar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          // Vista normal (por asesor): usamos el contenedor habitual
+          <div className="usuarios-asesor-table-wrapper">
+            <table className="usuarios-asesor-table">
+              <thead>
+                <tr>
+                  <th>
+                    <input
+                      type="checkbox"
+                      onChange={handleSelectAll}
+                      checked={selectedUsers.length === sortedUsuarios.length && sortedUsuarios.length > 0}
+                    />
+                  </th>
+                  <th>Nombre Usuario</th>
+                  <th>Email</th>
+                  <th>País</th>
+                  <th>Tipo de Negocio</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedUsuarios.map((u) => (
                   <tr key={u._id}>
                     <td>
                       <input
@@ -607,36 +617,28 @@ const UsuariosAsesor = () => {
                         onChange={() => handleCheckboxChange(u._id)}
                       />
                     </td>
-                    {allUsersMode && <td>{asesorName}</td>}
                     <td>{u.nombre_usuario}</td>
                     <td>{u.email_usuario}</td>
                     <td>{u.pais}</td>
                     <td>{u.tipo_negocio}</td>
                     <td>
                       <div className="action-buttons">
-                        <button
-                          className="usuarios-asesor-button editar-button"
-                          onClick={() => handleEdit(u)}
-                        >
+                        <button className="usuarios-asesor-button editar-button" onClick={() => handleEdit(u)}>
                           Editar
                         </button>
-                        <button
-                          className="usuarios-asesor-button eliminar-button"
-                          onClick={() => handleDelete(u._id)}
-                        >
+                        <button className="usuarios-asesor-button eliminar-button" onClick={() => handleDelete(u._id)}>
                           Eliminar
                         </button>
                       </div>
                     </td>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
 
-      {/* Tabla del histórico de usuarios */}
+      {/* Tabla del histórico */}
       {historicoVisible && (
         <div>
           <h3>Histórico de Usuarios</h3>
