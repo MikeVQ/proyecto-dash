@@ -1,6 +1,6 @@
 /* Contenedor principal: caja blanca, centrada, con sombra */
 .usuarios-asesor-container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 40px auto;
     background-color: #fff;
     color: #000;
