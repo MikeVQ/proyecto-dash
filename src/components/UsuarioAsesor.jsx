@@ -8,9 +8,6 @@ const UsuariosAsesor = () => {
   const [selectedAsesor, setSelectedAsesor] = useState("");
   const [usuarios, setUsuarios] = useState([]);
 
-  // Controlar si estamos mostrando TODOS los usuarios o solo los de un asesor
-  const [allUsersMode, setAllUsersMode] = useState(false);
-
   // Estados para el histórico
   const [historico, setHistorico] = useState([]);
   const [historicoVisible, setHistoricoVisible] = useState(false);
@@ -68,26 +65,9 @@ const UsuariosAsesor = () => {
       .then(res => {
         setUsuarios(res.data);
         setHistoricoVisible(false);
-        setAllUsersMode(false); // Modo normal
-        setSelectedUsers([]);   // Limpia selección
+        setSelectedUsers([]); // Limpia selección
       })
       .catch(err => console.error("Error:", err));
-  };
-
-  // 2.b Listar TODOS los usuarios (sin filtrar por asesor)
-  const handleListarTodosLosUsuarios = () => {
-    axios.get("/api/usuariosAsesor?all=true")
-      .then(res => {
-        setUsuarios(res.data);
-        setHistoricoVisible(false);
-        setAllUsersMode(true); // Modo "todos"
-        setSelectedUsers([]);
-      })
-      .catch(err => {
-        console.error("Error al obtener todos los usuarios:", err);
-        setMessage("Error al obtener todos los usuarios.");
-        setMessageType("error");
-      });
   };
 
   // 3. Crear usuario (modo creación)
@@ -124,7 +104,7 @@ const UsuariosAsesor = () => {
       });
   };
 
-  // 3.b Actualizar usuario (modo edición)
+  // 3.b Función para actualizar usuario (modo edición)
   const handleUpdateUsuario = async () => {
     try {
       await axios.put("/api/usuariosAsesor", {
@@ -249,7 +229,6 @@ const UsuariosAsesor = () => {
       .then(res => {
         setHistorico(res.data);
         setHistoricoVisible(true);
-        setAllUsersMode(false);
         setSelectedUsers([]);
       })
       .catch(err => {
@@ -325,6 +304,8 @@ const UsuariosAsesor = () => {
     }
   };
 
+  const [batchDeleteModalVisible, setBatchDeleteModalVisible] = useState(false);
+
   const openBatchDeleteModal = () => {
     if (selectedUsers.length === 0) {
       alert("No has seleccionado ningún usuario para eliminar.");
@@ -333,6 +314,8 @@ const UsuariosAsesor = () => {
     setBatchDeleteConfirmationText("");
     setBatchDeleteModalVisible(true);
   };
+
+  const [batchDeleteConfirmationText, setBatchDeleteConfirmationText] = useState("");
 
   const cancelBatchDelete = () => {
     setBatchDeleteModalVisible(false);
@@ -364,11 +347,12 @@ const UsuariosAsesor = () => {
   // ============================
   //       ORDENAR A-Z / Z-A
   // ============================
+  const [sortOrder, setSortOrder] = useState("asc");
+
   const handleToggleSortOrder = () => {
     setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
   };
 
-  // Función que retorna la lista de usuarios ordenada
   const sortedUsuarios = [...usuarios].sort((a, b) => {
     const nameA = a.nombre_usuario.toLowerCase();
     const nameB = b.nombre_usuario.toLowerCase();
@@ -514,9 +498,6 @@ const UsuariosAsesor = () => {
         <button className="usuarios-asesor-button" onClick={handleHistoricoUsuarios}>
           Histórico de Usuarios
         </button>
-        <button className="usuarios-asesor-button" onClick={handleListarTodosLosUsuarios}>
-          Todos los Usuarios
-        </button>
       </div>
 
       {/* Formulario para crear o editar usuario */}
@@ -642,69 +623,62 @@ const UsuariosAsesor = () => {
           </table>
         </div>
       ) : (
-        /* USUARIOS NORMALES O "TODOS LOS USUARIOS" */
-        <div className="todos-usuarios-table-container">
-          <table className={`usuarios-asesor-table ${allUsersMode ? "todos-usuarios-table" : ""}`}>
-            <thead>
-              <tr>
-                {/* Checkbox para seleccionar/deseleccionar todos */}
-                <th>
+        /* USUARIOS NORMALES */
+        <table className="usuarios-asesor-table">
+          <thead>
+            <tr>
+              {/* Checkbox para seleccionar/deseleccionar todos */}
+              <th>
+                <input
+                  type="checkbox"
+                  onChange={handleSelectAll}
+                  checked={
+                    selectedUsers.length === usuarios.length &&
+                    usuarios.length > 0
+                  }
+                />
+              </th>
+              <th>Nombre Usuario</th>
+              <th>Email</th>
+              <th>País</th>
+              <th>Tipo de Negocio</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedUsuarios.map((u) => (
+              <tr key={u._id}>
+                <td>
                   <input
                     type="checkbox"
-                    onChange={handleSelectAll}
-                    checked={
-                      selectedUsers.length === usuarios.length &&
-                      usuarios.length > 0
-                    }
+                    checked={selectedUsers.includes(u._id)}
+                    onChange={() => handleCheckboxChange(u._id)}
                   />
-                </th>
-                {allUsersMode && <th>Asesor</th>}
-                <th>Nombre Usuario</th>
-                <th>Email</th>
-                <th>País</th>
-                <th>Tipo de Negocio</th>
-                <th>Acciones</th>
+                </td>
+                <td>{u.nombre_usuario}</td>
+                <td>{u.email_usuario}</td>
+                <td>{u.pais}</td>
+                <td>{u.tipo_negocio}</td>
+                <td>
+                  <div className="action-buttons">
+                    <button
+                      className="usuarios-asesor-button editar-button"
+                      onClick={() => handleEdit(u)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      className="usuarios-asesor-button eliminar-button"
+                      onClick={() => handleDelete(u._id)}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {sortedUsuarios.map((u) => {
-                const asesorName = u.asesorData?.nombre_asesor || "";
-                return (
-                  <tr key={u._id}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={selectedUsers.includes(u._id)}
-                        onChange={() => handleCheckboxChange(u._id)}
-                      />
-                    </td>
-                    {allUsersMode && <th>{asesorName}</th>}
-                    <td>{u.nombre_usuario}</td>
-                    <td>{u.email_usuario}</td>
-                    <td>{u.pais}</td>
-                    <td>{u.tipo_negocio}</td>
-                    <td>
-                      <div className="action-buttons">
-                        <button
-                          className="usuarios-asesor-button editar-button"
-                          onClick={() => handleEdit(u)}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          className="usuarios-asesor-button eliminar-button"
-                          onClick={() => handleDelete(u._id)}
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );

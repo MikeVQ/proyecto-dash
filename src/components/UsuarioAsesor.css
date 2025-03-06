@@ -9,18 +9,6 @@
     padding: 20px;
 }
 
-/* Contenedor especial para la tabla de "Todos los Usuarios"
-   Este contenedor rompe con el max-width del padre para mostrar la tabla completa */
-.all-users-table-container {
-    width: 100vw;
-    position: relative;
-    left: 50%;
-    right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
-    padding: 0 20px; /* Opcional: espacio lateral para que la tabla no toque los bordes del viewport */
-}
-
 /* Título */
 .usuarios-asesor-title {
     text-align: center;
@@ -171,8 +159,6 @@
 
 /* Estilo general de la tabla de usuarios */
 .usuarios-asesor-table {
-    /* Para la vista normal se usa width: 100% (limitada por el contenedor padre);
-       en "Todos los Usuarios" la tabla se mostrará dentro de .all-users-table-container */
     width: 100%;
     border-collapse: collapse;
     background-color: #fff;
@@ -182,7 +168,7 @@
     margin: 0 auto;
 }
 
-/* Reducir padding en celdas para disminuir el espacio entre columnas */
+/* Ajusta el padding y permite que las celdas se quiebren si el texto es largo */
 .usuarios-asesor-table th,
 .usuarios-asesor-table td {
     padding: 6px;
@@ -258,7 +244,6 @@
 }
 
 /* ----- RESPONSIVIDAD ----- */
-
 @media (max-width: 768px) {
     .usuarios-asesor-form {
         flex-direction: column;
