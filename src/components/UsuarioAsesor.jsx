@@ -39,6 +39,9 @@ const UsuariosAsesor = () => {
   const [batchDeleteModalVisible, setBatchDeleteModalVisible] = useState(false);
   const [batchDeleteConfirmationText, setBatchDeleteConfirmationText] = useState("");
 
+  // <--- ADDED CODE: estado para distinguir entre "usuarios de un asesor" y "todos los usuarios"
+  const [allUsersMode, setAllUsersMode] = useState(false);
+
   // 1. Cargar asesores al montar
   useEffect(() => {
     axios.get("/api/asesores")
@@ -59,8 +62,27 @@ const UsuariosAsesor = () => {
         setUsuarios(res.data);
         setHistoricoVisible(false); // Oculta el histórico si se listan usuarios actuales
         setSelectedUsers([]);       // Limpia selección en batch
+
+        // <--- ADDED CODE: al listar solo de un asesor, salimos del modo "todos"
+        setAllUsersMode(false);
       })
       .catch(err => console.error("Error:", err));
+  };
+
+  // <--- ADDED CODE: 2.b Listar TODOS los usuarios
+  const handleListarTodosLosUsuarios = () => {
+    axios.get("/api/usuariosAsesor?all=true")
+      .then(res => {
+        setUsuarios(res.data);
+        setHistoricoVisible(false);
+        setSelectedUsers([]);
+        setAllUsersMode(true); // Activamos modo "todos los usuarios"
+      })
+      .catch(err => {
+        console.error("Error:", err);
+        setMessage("Error al obtener todos los usuarios.");
+        setMessageType("error");
+      });
   };
 
   // 3. Crear usuario (modo creación)
@@ -242,6 +264,8 @@ const UsuariosAsesor = () => {
         setHistorico(res.data);
         setHistoricoVisible(true);
         setSelectedUsers([]);
+        // <--- ADDED CODE: salimos de modo "todos" si venimos al histórico
+        setAllUsersMode(false);
       })
       .catch(err => {
         console.error("Error al obtener histórico:", err);
@@ -297,8 +321,6 @@ const UsuariosAsesor = () => {
   };
 
   // ============ ELIMINACIÓN POR LOTES (CON POP-UP) ============
-
-  // Almacenar y actualizar la selección de checkboxes
   const handleCheckboxChange = (userId) => {
     setSelectedUsers((prevSelected) => {
       if (prevSelected.includes(userId)) {
@@ -311,7 +333,6 @@ const UsuariosAsesor = () => {
     });
   };
 
-  // Seleccionar / deseleccionar todos
   const handleSelectAll = (e) => {
     if (e.target.checked) {
       // Seleccionar todos
@@ -323,7 +344,6 @@ const UsuariosAsesor = () => {
     }
   };
 
-  // Abre el pop-up para confirmar la eliminación de varios usuarios
   const openBatchDeleteModal = () => {
     if (selectedUsers.length === 0) {
       alert("No has seleccionado ningún usuario para eliminar.");
@@ -333,13 +353,11 @@ const UsuariosAsesor = () => {
     setBatchDeleteModalVisible(true);
   };
 
-  // Cierra el pop-up de eliminación por lotes
   const cancelBatchDelete = () => {
     setBatchDeleteModalVisible(false);
     setBatchDeleteConfirmationText("");
   };
 
-  // Confirma la eliminación por lotes (si el usuario escribe "DELETE")
   const confirmBatchDelete = async () => {
     if (batchDeleteConfirmationText !== "DELETE") {
       alert("La palabra ingresada no es correcta.");
@@ -471,6 +489,11 @@ const UsuariosAsesor = () => {
         <button className="usuarios-asesor-button" onClick={handleHistoricoUsuarios}>
           Histórico de Usuarios
         </button>
+        
+        {/* <--- ADDED CODE: botón para "Todos los Usuarios" */}
+        <button className="usuarios-asesor-button" onClick={handleListarTodosLosUsuarios}>
+          Todos los Usuarios
+        </button>
       </div>
 
       {/* Formulario para crear o editar usuario */}
@@ -552,63 +575,78 @@ const UsuariosAsesor = () => {
         </button>
       )}
 
-      {/* Tabla de usuarios (cuando no se muestra el histórico) */}
+      {/* 
+        Tabla de usuarios (cuando NO se muestra el histórico). 
+        Envuelta en un div con overflow-x para evitar que se salga si es muy ancha.
+      */}
       {!historicoVisible && (
-        <table className="usuarios-asesor-table">
-          <thead>
-            <tr>
-              {/* Checkbox para seleccionar/deseleccionar todos */}
-              <th>
-                <input
-                  type="checkbox"
-                  onChange={handleSelectAll}
-                  checked={
-                    selectedUsers.length === usuarios.length &&
-                    usuarios.length > 0
-                  }
-                />
-              </th>
-              <th>Nombre Usuario</th>
-              <th>Email</th>
-              <th>País</th>
-              <th>Tipo de Negocio</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {usuarios.map((u) => (
-              <tr key={u._id}>
-                <td>
+        <div className="usuarios-asesor-table-wrapper"> {/* <--- ADDED CODE */}
+          <table className="usuarios-asesor-table">
+            <thead>
+              <tr>
+                {/* Checkbox para seleccionar/deseleccionar todos */}
+                <th>
                   <input
                     type="checkbox"
-                    checked={selectedUsers.includes(u._id)}
-                    onChange={() => handleCheckboxChange(u._id)}
+                    onChange={handleSelectAll}
+                    checked={
+                      selectedUsers.length === usuarios.length &&
+                      usuarios.length > 0
+                    }
                   />
-                </td>
-                <td>{u.nombre_usuario}</td>
-                <td>{u.email_usuario}</td>
-                <td>{u.pais}</td>
-                <td>{u.tipo_negocio}</td>
-                <td>
-                  <div className="action-buttons">
-                    <button
-                      className="usuarios-asesor-button editar-button"
-                      onClick={() => handleEdit(u)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      className="usuarios-asesor-button eliminar-button"
-                      onClick={() => handleDelete(u._id)}
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </td>
+                </th>
+
+                {/* <--- ADDED CODE: si estamos en modo "todos", mostramos la columna Asesor */}
+                {allUsersMode && <th>Asesor</th>}
+
+                <th>Nombre Usuario</th>
+                <th>Email</th>
+                <th>País</th>
+                <th>Tipo de Negocio</th>
+                <th>Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {usuarios.map((u) => (
+                <tr key={u._id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedUsers.includes(u._id)}
+                      onChange={() => handleCheckboxChange(u._id)}
+                    />
+                  </td>
+
+                  {/* <--- ADDED CODE: si estamos en modo "todos", mostramos el nombre del asesor */}
+                  {allUsersMode && (
+                    <td>{u.asesorData?.nombre_asesor || ""}</td>
+                  )}
+
+                  <td>{u.nombre_usuario}</td>
+                  <td>{u.email_usuario}</td>
+                  <td>{u.pais}</td>
+                  <td>{u.tipo_negocio}</td>
+                  <td>
+                    <div className="action-buttons">
+                      <button
+                        className="usuarios-asesor-button editar-button"
+                        onClick={() => handleEdit(u)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="usuarios-asesor-button eliminar-button"
+                        onClick={() => handleDelete(u._id)}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* Tabla del histórico de usuarios */}
