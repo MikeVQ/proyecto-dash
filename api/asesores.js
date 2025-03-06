@@ -1,11 +1,10 @@
 // /api/asesores.js
 import { connectToDatabase } from "./_dbConnection.js";
-import { ObjectId } from "mongodb";
 
 export default async function handler(req, res) {
   // CORS y preflight
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") {
     return res.status(200).end();
@@ -44,23 +43,6 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, message: "Asesor creado" });
     } catch (error) {
       console.error("Error al crear asesor:", error);
-      return res.status(500).json({ error: error.message });
-    }
-
-  } else if (req.method === "DELETE") {
-    // Eliminar asesor
-    try {
-      const { _id } = req.query;
-      if (!_id) {
-        return res.status(400).json({ error: "Falta el _id del asesor." });
-      }
-      const result = await asesoresColl.deleteOne({ _id: new ObjectId(_id) });
-      if (result.deletedCount === 0) {
-        return res.status(404).json({ error: "No se encontró el asesor." });
-      }
-      return res.status(200).json({ success: true, message: "Asesor eliminado" });
-    } catch (error) {
-      console.error("Error al eliminar asesor:", error);
       return res.status(500).json({ error: error.message });
     }
 
