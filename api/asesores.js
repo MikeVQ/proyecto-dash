@@ -1,5 +1,7 @@
 // /api/asesores.js
 import { connectToDatabase } from "./_dbConnection.js";
+import { ObjectId } from "mongodb";
+
 
 export default async function handler(req, res) {
   // CORS y preflight
@@ -46,6 +48,26 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: error.message });
     }
 
+  }  else if (req.method === "PUT") {
+    try {
+      const { _id, nombre_asesor, email_asesor } = req.body;
+      if (!_id || !nombre_asesor || !email_asesor) {
+        return res
+          .status(400)
+          .json({ error: "Faltan campos obligatorios (nombre_asesor, email_asesor, _id)." });
+      }
+      const result = await asesoresColl.updateOne(
+        { _id: new ObjectId(_id) },
+        { $set: { nombre_asesor, email_asesor } }
+      );
+      if (result.modifiedCount === 0) {
+        return res.status(404).json({ error: "No se encontró el asesor o no hubo cambios." });
+      }
+      return res.status(200).json({ success: true, message: "Asesor actualizado" });
+    } catch (error) {
+      console.error("Error al actualizar asesor:", error);
+      return res.status(500).json({ error: error.message });
+    }
   } else {
     // Métodos no permitidos
     return res.status(405).json({ error: "Método no permitido" });
