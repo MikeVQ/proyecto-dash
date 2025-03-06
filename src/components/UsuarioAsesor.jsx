@@ -352,15 +352,25 @@ const UsuariosAsesor = () => {
   const handleToggleSortOrder = () => {
     setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
   };
-
+  
   // Ordenamos usuarios antes de renderizar la tabla
-  const sortedUsuarios = [...usuarios].sort((a, b) => {
-    const nameA = a.nombre_usuario.toLowerCase();
-    const nameB = b.nombre_usuario.toLowerCase();
-    if (nameA < nameB) return sortOrder === "asc" ? -1 : 1;
-    if (nameA > nameB) return sortOrder === "asc" ? 1 : -1;
-    return 0;
-  });
+    const sortedUsuarios = [...usuarios].sort((a, b) => {
+      if (allUsersMode) {
+        // Ordenar por el nombre del asesor (que viene en asesorData.nombre_asesor)
+        const asesorA = (a.asesorData?.nombre_asesor || "").toLowerCase();
+        const asesorB = (b.asesorData?.nombre_asesor || "").toLowerCase();
+        if (asesorA < asesorB) return sortOrder === "asc" ? -1 : 1;
+        if (asesorA > asesorB) return sortOrder === "asc" ? 1 : -1;
+        return 0;
+      } else {
+        // Ordenar por nombre del usuario (como estaba)
+        const nameA = a.nombre_usuario.toLowerCase();
+        const nameB = b.nombre_usuario.toLowerCase();
+        if (nameA < nameB) return sortOrder === "asc" ? -1 : 1;
+        if (nameA > nameB) return sortOrder === "asc" ? 1 : -1;
+        return 0;
+      }
+    });
 
   return (
     <div className="usuarios-asesor-container">
