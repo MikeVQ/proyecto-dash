@@ -12,8 +12,14 @@ export default async function handler(req, res) {
   }
 
   // Conectar a la base de datos y obtener la colección
-  const db = await connectToDatabase();
-  const asesoresColl = db.collection("asesores");
+  let db, asesoresColl;
+  try {
+    db = await connectToDatabase();
+    asesoresColl = db.collection("asesores");
+  } catch (err) {
+    console.error("Error al conectar con la base de datos:", err);
+    return res.status(500).json({ error: "Error al conectar con la base de datos" });
+  }
 
   if (req.method === "GET") {
     try {
@@ -34,9 +40,8 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: error.message });
     }
   } else if (req.method === "POST") {
-    // Crear asesor
     try {
-      const data = req.body; 
+      const data = req.body;
       // Validación de campos mínimos
       if (!data.nombre_asesor || !data.email_asesor) {
         return res
@@ -51,7 +56,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: error.message });
     }
   } else if (req.method === "DELETE") {
-    // Eliminar asesor
     try {
       const { _id } = req.query;
       if (!_id) {
@@ -67,7 +71,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: error.message });
     }
   } else {
-    // Métodos no permitidos
     return res.status(405).json({ error: "Método no permitido" });
   }
 }
