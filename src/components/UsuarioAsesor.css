@@ -165,14 +165,16 @@
     margin-top: 10px;
 }
 
-/* Tabla de usuarios */
 .usuarios-asesor-table {
-    width: 100%;
     border-collapse: collapse;
     background-color: #fff;
     border-radius: 8px;
     overflow: hidden;
-}
+    
+    /* Quita width: 100% y añade lo siguiente: */
+    width: auto;       /* La tabla se ajusta al ancho de su contenido */
+    margin: 0 auto;    /* Centra la tabla dentro de su contenedor padre */
+  }
 
 .message-success {
     background-color: #e0f8e9; /* Fondo verde claro */
