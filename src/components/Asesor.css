@@ -102,6 +102,11 @@
   background: red;
 }
 
+/* Contenedor para el botón de eliminar seleccionados */
+.asesor-actions {
+  margin-bottom: 20px;
+}
+
 /* Botones de acción en la tabla (Editar y Eliminar) */
 .edit-button {
   background-color: green;
@@ -111,10 +116,10 @@
   background-color: red;
 }
 
-/* Reducir el tamaño del botón en el formulario (Agregar/Actualizar Asesor) */
-.asesor-form .asesor-button {
-  padding: 8px 12px;
-  font-size: 0.9rem;
+/* Mantener el mismo tamaño para "Agregar Asesor" que "Regresar" */
+.asesor-form .add-asesor {
+  padding: 10px 16px;
+  font-size: 1rem;
 }
 
 /* Tabla de asesores */

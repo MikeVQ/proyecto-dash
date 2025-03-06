@@ -104,7 +104,7 @@ const Asesor = () => {
   const handleCheckboxChange = (id) => {
     setSelectedAsesores((prevSelected) => {
       if (prevSelected.includes(id)) {
-        return prevSelected.filter((ase => ase !== id));
+        return prevSelected.filter((ase) => ase !== id);
       } else {
         return [...prevSelected, id];
       }
@@ -158,7 +158,7 @@ const Asesor = () => {
 
   return (
     <div className="asesor-container">
-      {/* Encabezado con botón de regresar */}
+      {/* Encabezado con botón de regresar y título */}
       <div className="header">
         <button onClick={handleBack} className="asesor-button back-button">
           Regresar
@@ -187,14 +187,21 @@ const Asesor = () => {
             onChange={(e) => setEmailAsesor(e.target.value)}
           />
         </div>
-        <button onClick={handleCreateOrUpdateAsesor} className="asesor-button">
+        {/* Se agrega la clase add-asesor para igualar tamaño con "Regresar" */}
+        <button
+          onClick={handleCreateOrUpdateAsesor}
+          className="asesor-button add-asesor"
+        >
           {editingAsesor ? "Actualizar Asesor" : "Agregar Asesor"}
         </button>
       </div>
 
-      {/* Botón para eliminar asesores seleccionados */}
+      {/* Botón para eliminar asesores seleccionados con margen inferior */}
       <div className="asesor-actions">
-        <button onClick={handleDeleteSelected} className="asesor-button delete-selected">
+        <button
+          onClick={handleDeleteSelected}
+          className="asesor-button delete-selected"
+        >
           Eliminar Seleccionados
         </button>
       </div>
@@ -207,7 +214,10 @@ const Asesor = () => {
               <input
                 type="checkbox"
                 onChange={handleSelectAll}
-                checked={selectedAsesores.length === asesores.length && asesores.length > 0}
+                checked={
+                  selectedAsesores.length === asesores.length &&
+                  asesores.length > 0
+                }
               />
             </th>
             <th>Nombre Asesor</th>
@@ -235,10 +245,16 @@ const Asesor = () => {
                 <td>{asesor.nombre_asesor}</td>
                 <td>{asesor.email_asesor}</td>
                 <td>
-                  <button onClick={() => handleEdit(asesor)} className="asesor-button edit-button">
+                  <button
+                    onClick={() => handleEdit(asesor)}
+                    className="asesor-button edit-button"
+                  >
                     Editar
                   </button>
-                  <button onClick={() => handleDelete(asesor._id)} className="asesor-button delete-button">
+                  <button
+                    onClick={() => handleDelete(asesor._id)}
+                    className="asesor-button delete-button"
+                  >
                     Eliminar
                   </button>
                 </td>
