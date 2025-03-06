@@ -16,54 +16,62 @@
     font-size: 1.8rem;
     color: #333;
 }
+.usuarios-asesor-table-wrapper {
+    width: 100%;
+    margin: 0 auto;       /* Centra el contenedor */
+    overflow-x: auto;     /* Activa el scroll horizontal si la tabla es demasiado ancha */
+  }
+  
 
 /* Título y botón "Regresar" en la misma fila */
 .title-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-}
-
-/* Mensajes de éxito o error */
-.message-success {
+  }
+  
+  /* Mensajes de éxito o error */
+  .message-success {
     background-color: #e0f8e9; /* Fondo verde claro */
     color: green;
-}
-.message-error {
+  }
+  
+  .message-error {
     background-color: #fce4ec; /* Fondo rosado claro */
     color: red;
-}
-
-/* Contenedor de la sección de carga masiva */
-.usuarios-asesor-mass-upload {
+  }
+  
+  /* Contenedor de la sección de carga masiva */
+  .usuarios-asesor-mass-upload {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px; /* Espacio debajo de la sección */
-}
-
-/* Contenedor para agrupar el texto "Carga Masiva", "Descargar Formato" y "Elegir Archivo" */
-.mass-upload-left {
+  }
+  
+  /* Contenedor para agrupar el texto "Carga Masiva", "Descargar Formato" y "Elegir Archivo" */
+  .mass-upload-left {
     display: flex;
     gap: 10px;
     align-items: center;
-}
-
-/* Alinear los botones de Editar y Eliminar en la misma fila con espacio */
-.action-buttons {
+  }
+  
+  /* Alinear los botones de Editar y Eliminar en la misma fila con espacio */
+  .action-buttons {
     display: flex;
     gap: 10px; /* Espacio entre botones */
-}
-
-/* Botón Editar (verde) */
-.editar-button {
+  }
+  
+  /* Botón Editar (verde) */
+  .editar-button {
     background-color: green;
-}
-
-/* Botón Eliminar (rojo) */
-.eliminar-button {
+  }
+  
+  /* Botón Eliminar (rojo) */
+  .eliminar-button {
     background-color: red;
-}
+  }
+  
 
 /* Mensaje de error o éxito */
 .usuarios-asesor-message {
@@ -105,6 +113,7 @@
     font-weight: bold;
     transition: background 0.3s;
 }
+
 .usuarios-asesor-button:hover {
     background: #357abd;
 }
@@ -145,17 +154,18 @@
 .usuarios-asesor-mass-upload {
     margin-bottom: 20px;
 }
+
 .file-label {
     margin-left: 10px;
     cursor: pointer;
-}
+  }
 
 /* Input para subir archivo */
 .usuarios-asesor-file {
     margin-top: 10px;
 }
 
-/* Tabla de usuarios (vista normal) */
+/* Tabla de usuarios */
 .usuarios-asesor-table {
     width: 100%;
     border-collapse: collapse;
@@ -164,13 +174,79 @@
     overflow: hidden;
 }
 
-/* Tabla de "Todos los usuarios", centrada */
-.all-users-table {
-    width: auto;      /* Ajusta al contenido */
-    margin: 0 auto;   /* Centra horizontalmente */
-}
+.message-success {
+    background-color: #e0f8e9; /* Fondo verde claro */
+    color: green;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .message-error {
+    background-color: #fce4ec; /* Fondo rosado claro */
+    color: red;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
 
-/* Encabezado y celdas */
+/* Modal overlay para centrar el pop up con fondo semitransparente */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  /* Contenedor del modal */
+  .modal {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+  }
+  
+  /* Estilo para el input del modal */
+  .modal input[type="text"] {
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #ccc; /* Opcional: define un borde */
+    padding: 8px;
+    margin: 10px 0;
+    width: 80%;
+  }
+  
+  
+  /* Contenedor de botones dentro del modal */
+  .modal-buttons {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  
+/* Botón Editar en color verde */
+.usuarios-asesor-button.editar-button {
+    background-color: green;
+    margin-right: 10px;  /* Espacio a la derecha */
+  }
+  
+  /* Botón Eliminar en color rojo */
+  .usuarios-asesor-button.eliminar-button {
+    background-color: red;
+  }
+
+  
 .usuarios-asesor-table th,
 .usuarios-asesor-table td {
     padding: 12px;
@@ -194,67 +270,13 @@
     background-color: #e9ecef;
 }
 
-/* Modal overlay para centrar el pop up con fondo semitransparente */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-/* Contenedor del modal */
-.modal {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    width: 300px;
-    text-align: center;
-}
-
-/* Estilo para el input del modal */
-.modal input[type="text"] {
-    background-color: #fff;
-    color: #000;
-    border: 1px solid #ccc; /* Opcional: define un borde */
-    padding: 8px;
-    margin: 10px 0;
-    width: 80%;
-}
-
-/* Contenedor de botones dentro del modal */
-.modal-buttons {
-    margin-top: 15px;
-    display: flex;
-    justify-content: space-around;
-}
-
 /* Ajustar el tamaño de los inputs en pantallas pequeñas */
 @media (max-width: 768px) {
     .usuarios-asesor-form {
         flex-direction: column;
     }
+    
     .usuarios-asesor-input {
         width: 100%;
     }
-}
-
-/* ================== CLASE ÚNICA PARA "TODOS LOS USUARIOS" ================== */
-.todos-usuarios-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;      /* Centra el contenido en el eje horizontal */
-    justify-content: center;  /* Centra en el eje vertical si fuese necesario */
-    margin-top: 20px;         /* Espacio adicional arriba */
-}
-
-/* Ajustar la tabla cuando se use .todos-usuarios-container */
-.todos-usuarios-container .usuarios-asesor-table {
-    width: auto;
-    margin: 0 auto; /* Centra horizontalmente */
 }
