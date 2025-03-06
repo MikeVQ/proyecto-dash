@@ -387,7 +387,7 @@ const Dashboard = () => {
           </div>
 
           <div className="chart-box">
-            <h3>🍰 Distribución de Descargas</h3>
+            <h3> Distribución de Descargas</h3>
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
@@ -409,7 +409,7 @@ const Dashboard = () => {
           </div>
 
           <div className="chart-box">
-            <h3>📊 Gráfico de Marimekko</h3>
+            <h3> Gráfico de Marimekko</h3>
             <ResponsiveContainer width="100%" height={250}>
               <Treemap
                 data={treemapData}
