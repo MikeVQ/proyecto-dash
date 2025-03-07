@@ -31,7 +31,7 @@ function Login() {
 
     // Configuración del enlace (Magic Link)
     const actionCodeSettings = {
-      url: "https://proyecto-dash.vercel.app/dashboard", // Ajusta la ruta si es necesario
+      url: "https://ah-dashboard-staging.azurewebsites.net/auth-callbac",
       handleCodeInApp: true
     };
 
