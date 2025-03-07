@@ -8,7 +8,7 @@ const pool = new Pool({
   port: process.env.PG_PORT || 5440,
   user: process.env.PG_USER || 'apiwebpostgres',
   password: process.env.PG_PASSWORD || 'AhApiWeb2023',
-  database: process.env.PG_DATABASE || 'AdrianaHoyosDB',
+  database: process.env.PG_DATABASE || 'AdrianaHoyosD',
   // Puedes agregar otros parámetros como max, idleTimeoutMillis, etc.
 });
 
