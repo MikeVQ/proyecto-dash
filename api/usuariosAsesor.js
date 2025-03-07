@@ -1,9 +1,8 @@
-// api/usuariosAsesor.js
+// /api/usuariosAsesor.js
 import { query } from "./dbConnection.js";
 
-// Este endpoint usa ES Modules y se asume que la conexión ya está configurada.
 export default async function handler(req, res) {
-  // Configuración de CORS
+  // Configuración CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -16,7 +15,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Faltan campos obligatorios." });
     }
     try {
-      // Verificar duplicado en función de asesor, nombre, email, origen y tipo de negocio
+      // Verificar duplicado
       const duplicateQuery = `
         SELECT * FROM public.ah_asignaciones
         WHERE asesor = $1 AND nombre = $2 AND email_usuario = $3 AND origen = $4 AND tipo_negocio = $5
@@ -35,28 +34,29 @@ export default async function handler(req, res) {
       const insertQuery = `
         INSERT INTO public.ah_asignaciones (email_usuario, nombre, origen, tipo_negocio, asesor)
         VALUES ($1, $2, $3, $4, $5)
+        RETURNING *, id_registro AS _id
       `;
-      await query(insertQuery, [
+      const insertRes = await query(insertQuery, [
         email_usuario,
         nombre_usuario,
         pais,
         tipo_negocio,
         nombre_asesor,
       ]);
-      return res.status(200).json({ success: true, message: "Usuario asignado con éxito." });
+      return res.status(200).json({ success: true, message: "Usuario asignado con éxito.", usuario: insertRes.rows[0] });
     } catch (error) {
       console.error("Error al insertar usuario:", error);
       return res.status(500).json({ error: "Error interno del servidor." });
     }
   }
-
   // --- LISTAR USUARIOS (GET) ---
   else if (req.method === "GET") {
     const { all, nombre_asesor } = req.query;
     try {
       if (all === "true") {
-        // Listar todos los registros en el esquema public
-        const result = await query("SELECT * FROM public.ah_asignaciones ORDER BY id_registro DESC");
+        const result = await query(
+          "SELECT *, id_registro AS _id FROM public.ah_asignaciones ORDER BY id_registro DESC"
+        );
         console.log("Listando todos los usuarios:", result.rows);
         return res.status(200).json(result.rows);
       } else {
@@ -64,7 +64,7 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: "Se requiere el nombre del asesor." });
         }
         const result = await query(
-          "SELECT * FROM public.ah_asignaciones WHERE asesor = $1 ORDER BY id_registro DESC",
+          "SELECT *, id_registro AS _id FROM public.ah_asignaciones WHERE asesor = $1 ORDER BY id_registro DESC",
           [nombre_asesor]
         );
         console.log(`Listando usuarios para asesor ${nombre_asesor}:`, result.rows);
@@ -72,13 +72,9 @@ export default async function handler(req, res) {
       }
     } catch (error) {
       console.error("Error al obtener usuarios:", error);
-      return res.status(500).json({ 
-        error: "Error interno del servidor.", 
-        details: error.message 
-      });
+      return res.status(500).json({ error: "Error interno del servidor.", details: error.message });
     }
   }
-
   // --- ACTUALIZAR USUARIO (PUT) ---
   else if (req.method === "PUT") {
     const { _id, nombre_asesor, nombre_usuario, email_usuario, pais, tipo_negocio } = req.body;
@@ -86,7 +82,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Faltan campos obligatorios para actualizar." });
     }
     try {
-      // Verificar duplicado excluyendo el registro actual
+      // Verificar duplicado (excluyendo el registro actual)
       const duplicateQuery = `
         SELECT * FROM public.ah_asignaciones
         WHERE asesor = $1 AND nombre = $2 AND email_usuario = $3 AND origen = $4 AND tipo_negocio = $5 AND id_registro <> $6
@@ -124,7 +120,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Error interno del servidor." });
     }
   }
-
   // --- ELIMINAR USUARIO (DELETE) ---
   else if (req.method === "DELETE") {
     const { _id } = req.query;
@@ -142,10 +137,7 @@ export default async function handler(req, res) {
       console.error("Error al eliminar usuario:", error);
       return res.status(500).json({ error: "Error interno del servidor." });
     }
-  }
-
-  // --- Método NO permitido ---
-  else {
+  } else {
     return res.status(405).json({ error: "Método no permitido" });
   }
 }
