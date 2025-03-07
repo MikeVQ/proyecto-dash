@@ -57,7 +57,7 @@ const UsuariosAsesor = () => {
   // 2. Listar usuarios de un asesor
   const handleListarUsuarios = () => {
     if (!selectedAsesor) return;
-    axios.get(`/api/usuariosAsesor?nombre_asesor=${encodeURIComponent(selectedAsesor)}`)
+    axios.get(/api/usuariosAsesor?nombre_asesor=${encodeURIComponent(selectedAsesor)})
       .then(res => {
         setUsuarios(res.data);
         setHistoricoVisible(false); // Oculta el histórico si se listan usuarios actuales
@@ -213,13 +213,13 @@ const UsuariosAsesor = () => {
       } else if (duplicates.length > 0) {
         // Éxito parcial
         setMessage(
-          `Se subieron ${successCount} usuario(s) con éxito. Se omitieron ${duplicates.length} por duplicados.`
+          Se subieron ${successCount} usuario(s) con éxito. Se omitieron ${duplicates.length} por duplicados.
         );
         setMessageType("success");
         setDuplicatedUsers(duplicates);
       } else {
         // No hubo duplicados
-        setMessage(`Usuarios cargados exitosamente. Total insertados: ${successCount}.`);
+        setMessage(Usuarios cargados exitosamente. Total insertados: ${successCount}.);
         setMessageType("success");
         setDuplicatedUsers([]);
       }
@@ -259,7 +259,7 @@ const UsuariosAsesor = () => {
       setMessageType("error");
       return;
     }
-    axios.get(`/api/historicoUsuarios?nombre_asesor=${encodeURIComponent(selectedAsesor)}`)
+    axios.get(/api/historicoUsuarios?nombre_asesor=${encodeURIComponent(selectedAsesor)})
       .then(res => {
         setHistorico(res.data);
         setHistoricoVisible(true);
@@ -296,7 +296,7 @@ const UsuariosAsesor = () => {
       return;
     }
     try {
-      await axios.delete(`/api/usuariosAsesor?_id=${deleteUserId}`);
+      await axios.delete(/api/usuariosAsesor?_id=${deleteUserId});
       setMessage("Usuario eliminado correctamente.");
       setMessageType("success");
       setDeleteModalVisible(false);
@@ -427,13 +427,13 @@ const UsuariosAsesor = () => {
       {/* Mensajes de éxito o error */}
       {message && (
         <p
-          className={`usuarios-asesor-message ${
+          className={usuarios-asesor-message ${
             messageType === "success"
               ? "message-success"
               : messageType === "error"
               ? "message-error"
               : ""
-          }`}
+          }}
         >
           {message}
         </p>

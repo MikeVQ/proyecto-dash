@@ -1,5 +1,6 @@
 // /api/usuariosAsesor/batchDelete.js
-import { query } from "../dbConnection.js";
+import { connectToDatabase } from "../_dbConnection.js";
+import { ObjectId } from "mongodb";
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -15,6 +16,9 @@ export default async function handler(req, res) {
   }
 
   try {
+    const db = await connectToDatabase();
+    const usuariosAsesorColl = db.collection("usuariosAsesor");
+
     const { ids } = req.body; // array de IDs a eliminar
     if (!Array.isArray(ids) || ids.length === 0) {
       return res
@@ -22,21 +26,19 @@ export default async function handler(req, res) {
         .json({ error: "No se proporcionó un array de IDs válido." });
     }
 
-    // Se asume que la tabla es "ah_asignaciones" y la columna identificadora es "id_registro"
-    // Utilizamos el operador ANY para eliminar todos los registros cuyos id_registro
-    // estén incluidos en el array ids. Se asume que los IDs son números.
-    const deleteQuery = `
-      DELETE FROM public.ah_asignaciones
-      WHERE id_registro = ANY($1::int[])
-    `;
-    const result = await query(deleteQuery, [ids]);
+    // Convertimos cada ID a ObjectId
+    const objectIds = ids.map((id) => new ObjectId(id));
+
+    // Eliminamos todos los documentos cuyo _id esté en el array
+    const result = await usuariosAsesorColl.deleteMany({ _id: { $in: objectIds } });
 
     return res.status(200).json({
       success: true,
-      message: `Se eliminaron ${result.rowCount} usuario(s).`,
+      message: Se eliminaron ${result.deletedCount} usuario(s).,
     });
   } catch (error) {
     console.error("Error al eliminar usuarios en batch:", error);
     return res.status(500).json({ error: "Error interno del servidor." });
   }
 }
+

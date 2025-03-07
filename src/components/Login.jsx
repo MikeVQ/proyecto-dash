@@ -31,9 +31,9 @@ function Login() {
 
     // Configuración del enlace (Magic Link)
     const actionCodeSettings = {
-      url: "https://ah-dashboard-staging-fka6bkayepgxfsfa.eastus-01.azurewebsites.net/dashboard",
+      url: "https://ah-dashboard-staging.azurewebsites.net/auth-callbac",
       handleCodeInApp: true
-    };    
+    };
 
     // Enviar Magic Link
     sendSignInLinkToEmail(auth, normalizedEmail, actionCodeSettings)
@@ -42,9 +42,9 @@ function Login() {
         window.localStorage.setItem("emailForSignIn", normalizedEmail);
 
         // Mostramos un mensaje de éxito
-        setMessage(`Se envió un correo de verificación a ${normalizedEmail}.
+        setMessage(Se envió un correo de verificación a ${normalizedEmail}.
 Por favor revisa tu bandeja de entrada.
-OJO: El correo puede estar archivado como no deseado.`);
+OJO: El correo puede estar archivado como no deseado.);
       })
       .catch((error) => {
         console.error("Error al enviar el correo de verificación:", error);
