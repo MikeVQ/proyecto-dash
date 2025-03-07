@@ -31,9 +31,10 @@ function Login() {
 
     // Configuración del enlace (Magic Link)
     const actionCodeSettings = {
-      url: "https://proyecto-dash.vercel.app/dashboard",
-      handleCodeInApp: true
+      url: "https://ah-dashboard-staging-fka6bkayepgxfsfa.eastus-01.azurewebsites.net/dashboard",
+      handleCodeInApp: true,
     };
+    
 
     // Enviar Magic Link
     sendSignInLinkToEmail(auth, normalizedEmail, actionCodeSettings)
