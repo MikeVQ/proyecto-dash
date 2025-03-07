@@ -1,5 +1,4 @@
-// testConnection.js
-import { query } from './dbConnection.js';
+import { query } from './api/dbConnection.js';
 
 (async () => {
   try {
