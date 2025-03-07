@@ -89,7 +89,7 @@ const Asesor = () => {
    */
   const handleDelete = async (id) => {
     try {
-      await axios.delete(/api/asesores?_id=${id});
+      await axios.delete(`/api/asesores?_id=${id}`);
       setMessage("Asesor eliminado correctamente.");
       fetchAsesores();
     } catch (error) {
@@ -134,7 +134,7 @@ const Asesor = () => {
     try {
       // Se elimina uno por uno (o se podría implementar un endpoint batch)
       await Promise.all(
-        selectedAsesores.map((id) => axios.delete(/api/asesores?_id=${id}))
+        selectedAsesores.map((id) => axios.delete(`/api/asesores?_id=${id}`))
       );
       setMessage("Asesores eliminados correctamente.");
       setSelectedAsesores([]);

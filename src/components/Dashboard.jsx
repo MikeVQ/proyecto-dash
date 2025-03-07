@@ -400,7 +400,7 @@ const Dashboard = () => {
                   label
                 >
                   {chartData.map((entry, index) => (
-                    <Cell key={cell-${index}} fill={entry.color} />
+                    <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -419,7 +419,7 @@ const Dashboard = () => {
               >
                 {treemapData.map((entry, index) => (
                   <Cell
-                    key={cell-${index}}
+                    key={`cell-${index}`}
                     fill={COLORS[index % COLORS.length]}
                   />
                 ))}

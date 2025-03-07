@@ -34,11 +34,10 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
-      message: Se eliminaron ${result.deletedCount} usuario(s).,
+      message: `Se eliminaron ${result.deletedCount} usuario(s).`,
     });
   } catch (error) {
     console.error("Error al eliminar usuarios en batch:", error);
     return res.status(500).json({ error: "Error interno del servidor." });
   }
 }
-
