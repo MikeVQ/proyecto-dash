@@ -1,38 +1,14 @@
-import { MongoClient } from "mongodb";
-
-// Para caching de la conexión y evitar reconexiones en cada llamada
-let cachedDb = null;
+import { query } from "./dbConnection.js";
 
 /**
- * Conecta a la base de datos MongoDB (usando la variable de entorno MONGO_URI).
- */
-async function connectToDatabase() {
-  if (cachedDb) {
-    return cachedDb;
-  }
-
-  const uri = process.env.MONGO_URI;
-  if (!uri) {
-    throw new Error("❌ No se definió la variable MONGO_URI en el entorno.");
-  }
-
-  const client = new MongoClient(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-
-  await client.connect();
-  const db = client.db("AH_dashboard"); // Ajusta el nombre si tu DB se llama distinto
-  cachedDb = db;
-  return db;
-}
-
-/**
- * Handler principal para la Serverless Function en Vercel.
- * Soporta GET y POST.
+ * Handler para la función API que soporta los métodos GET y POST.
+ * Se espera que la tabla "eventos" tenga las siguientes columnas en snake_case:
+ * id_usuario, email_usuario, nombre_usuario, url_actual, url_link, fecha,
+ * email_asesor, asesor, origen_asesor, tipo_negocio_asesor, fecha_notificacion,
+ * mail_enviado, observaciones, hora_notificacion, nombre_producto, sku_producto.
  */
 export default async function handler(req, res) {
-  // Habilitar CORS (opcional, si tu front está en otro dominio)
+  // Habilitar CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -42,19 +18,13 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // Conectar a la base de datos
-  const db = await connectToDatabase();
-  const collection = db.collection("eventos");
-
+  // Manejo del método POST: inserción de datos
   if (req.method === "POST") {
     try {
-      // En Vercel, req.body suele llegar como objeto si tu configuración de bodyParser está activa.
-      // Si ves "[object Object] is not valid JSON", elimina el JSON.parse() o revisa la config.
       const data = req.body;
       console.log("Datos recibidos:", data);
 
       // 1. Verificar que existan todas las claves obligatorias
-      //    (observaciones es opcional)
       if (
         typeof data.idUsuario === "undefined" ||
         typeof data.emailUsuario === "undefined" ||
@@ -77,9 +47,8 @@ export default async function handler(req, res) {
           .json({ error: "❌ Error: Faltan claves en la petición" });
       }
 
-      // 2. Validar que los campos obligatorios no vengan vacíos (salvo mailEnviado si es boolean false)
-      //    mailEnviado es boolean: si lo hacemos con "!data.mailEnviado" invalidaría "false".
-      //    Observaciones es opcional, así que no la chequeamos aquí.
+      // 2. Validar que los campos obligatorios no estén vacíos
+      //    (excepto mailEnviado, que puede ser false)
       if (
         !data.idUsuario ||
         !data.emailUsuario ||
@@ -101,61 +70,72 @@ export default async function handler(req, res) {
           .json({ error: "❌ Error: Faltan datos en la petición" });
       }
 
-      // mailEnviado debe ser boolean (true/false)
+      // 3. Validar que mailEnviado sea boolean (true o false)
       if (typeof data.mailEnviado !== "boolean") {
         return res
           .status(400)
           .json({ error: "❌ Error: 'mailEnviado' debe ser boolean (true/false)" });
       }
 
-      // 3. observaciones es opcional, si no viene la guardamos como null
+      // 4. observaciones es opcional; si no se envía, lo asignamos como null
       const observaciones = data.observaciones ? data.observaciones : null;
 
-      // Insertar en la colección
-      // Guardamos los campos con nombres en snake_case
-      await collection.insertOne({
-        id_usuario: data.idUsuario,
-        email_usuario: data.emailUsuario,
-        nombre_usuario: data.nombreUsuario,
-        url_actual: data.urlActual,
-        url_link: data.urlLink,
-        fecha: data.fecha,
-        email_asesor: data.emailAsesor,
-        asesor: data.asesor,
-        origen_asesor: data.origenAsesor,
-        tipo_negocio_asesor: data.tipoNegocioAsesor,
-        fecha_notificacion: data.fechaNotificacion,
-        mail_enviado: data.mailEnviado,
-        observaciones: observaciones,
-        hora_notificacion: data.horaNotificacion,
-        nombre_producto: data.nombreProducto,
-        sku_producto: data.skuProducto
-      });
+      // 5. Insertar en la tabla "eventos"
+      const insertQuery = `
+        INSERT INTO eventos (
+          id_usuario, email_usuario, nombre_usuario, url_actual, url_link, fecha,
+          email_asesor, asesor, origen_asesor, tipo_negocio_asesor, fecha_notificacion,
+          mail_enviado, observaciones, hora_notificacion, nombre_producto, sku_producto
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      `;
+      const values = [
+        data.idUsuario,
+        data.emailUsuario,
+        data.nombreUsuario,
+        data.urlActual,
+        data.urlLink,
+        data.fecha,
+        data.emailAsesor,
+        data.asesor,
+        data.origenAsesor,
+        data.tipoNegocioAsesor,
+        data.fechaNotificacion,
+        data.mailEnviado,
+        observaciones,
+        data.horaNotificacion,
+        data.nombreProducto,
+        data.skuProducto,
+      ];
 
-      return res.status(200).json({ success: "✅ Datos guardados con éxito" });
+      await query(insertQuery, values);
+
+      return res
+        .status(200)
+        .json({ success: "✅ Datos guardados con éxito" });
     } catch (error) {
       console.error("❌ Error al guardar en la BD:", error);
       return res
         .status(500)
         .json({ error: "❌ Error al guardar en la BD", detalle: error.message });
     }
-  } else if (req.method === "GET") {
-    // Obtener datos
+  }
+  // Manejo del método GET: obtención de datos
+  else if (req.method === "GET") {
     try {
-      const eventos = await collection
-        .find({})
-        .sort({ fecha: -1 })
-        .toArray();
-
-      return res.status(200).json(eventos);
+      const result = await query("SELECT * FROM eventos ORDER BY fecha DESC");
+      return res.status(200).json(result.rows);
     } catch (error) {
       console.error("❌ Error al obtener datos:", error);
       return res
         .status(500)
         .json({ error: "❌ Error al obtener datos", detalle: error.message });
     }
-  } else {
-    // Otros métodos no permitidos
-    return res.status(405).json({ error: "❌ Error: Método no permitido" });
+  }
+  // Métodos no permitidos
+  else {
+    return res
+      .status(405)
+      .json({ error: "❌ Error: Método no permitido" });
   }
 }
