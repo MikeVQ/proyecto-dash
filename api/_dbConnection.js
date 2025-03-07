@@ -19,7 +19,7 @@ export async function connectToDatabase() {
   });
 
   await client.connect();
-  const db = client.db("AH_dashboard"); // Ajusta el nombre si tu DB se llama distinto
+  const db = client.db("AHprueba"); // Ajusta el nombre si tu DB se llama distinto
   cachedDb = db;
   return db;
 }
