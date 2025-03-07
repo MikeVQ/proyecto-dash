@@ -1,5 +1,6 @@
-// dbConnection.js
-import { Pool } from 'pg';
+// api/dbConnection.js
+import pkg from 'pg';
+const { Pool } = pkg;
 
 const pool = new Pool({
   host: process.env.PG_HOST || 'apiweb.cij6bn10nnbn.us-east-1.rds.amazonaws.com',
