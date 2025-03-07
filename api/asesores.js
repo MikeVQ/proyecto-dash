@@ -1,5 +1,5 @@
 // /api/asesores.js
-import { connectToDatabase } from "./_dbConnection.js";
+import { connectToDatabase } from "./dbConnection.js";
 import { ObjectId } from "mongodb";
 
 
