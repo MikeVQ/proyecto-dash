@@ -46,30 +46,33 @@ const Dashboard = () => {
   const [selectedFilter, setSelectedFilter] = useState("all"); // "all", "day", "month", "year", "range"
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const navigate = useNavigate(); // <-- Hook para navegar
+  const navigate = useNavigate(); // Hook para navegar
 
   // -----------------------------------------------
   // 1. Efecto para validar Magic Link y escuchar cambios de sesión
   // -----------------------------------------------
   useEffect(() => {
-    // Escuchar cambios de autenticación
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      setAuthLoading(false);
     });
-  
+
     // Si el usuario ya está logueado, no volvemos a verificar el Magic Link
     if (user) {
       setAuthLoading(false);
       return () => unsubscribe();
     }
-  
+
     // Verificar si la URL actual contiene un enlace de inicio de sesión (Magic Link)
     if (isSignInWithEmailLink(auth, window.location.href)) {
-      let email = window.localStorage.getItem("emailForSignIn");
+      const email = window.localStorage.getItem("emailForSignIn");
       if (!email) {
-        email = window.prompt("Por favor, ingresa tu correo para confirmar:");
+        console.error("No se encontró el correo en localStorage. Redirigiendo al login.");
+        setAuthLoading(false);
+        navigate("/");
+        return;
       }
-  
+
       signInWithEmailLink(auth, email, window.location.href)
         .then(() => {
           // Eliminamos el correo del localStorage por seguridad
@@ -82,14 +85,11 @@ const Dashboard = () => {
           setAuthLoading(false);
         });
     } else {
-      // Si no es un Magic Link, simplemente cambiamos el estado de loading
       setAuthLoading(false);
     }
-  
-    // Cleanup del listener
+
     return () => unsubscribe();
-  }, [auth, user]);
-  
+  }, [auth, user, navigate]);
 
   // -----------------------------------------------
   // 2. Efecto para obtener los datos de la API
@@ -240,8 +240,8 @@ const Dashboard = () => {
         </div>
       </div>
 
-       {/* BOTONES CENTRADOS BAJO LAS TARJETAS */}
-       <div className="dashboard-buttons-container">
+      {/* BOTONES CENTRADOS BAJO LAS TARJETAS */}
+      <div className="dashboard-buttons-container">
         <button
           onClick={() => navigate("/asesor")}
           className="add-asesor-btn"
