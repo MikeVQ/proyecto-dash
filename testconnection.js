@@ -1,5 +1,5 @@
 // testConnection.js
-const { query } = require('./dbConnection');
+import { query } from './dbConnection.js';
 
 (async () => {
   try {
