@@ -1,5 +1,5 @@
 // /api/historicoUsuarios.js
-import { connectToDatabase } from "./_dbConnection.js";
+import { connectToDatabase } from "./dbConnection.js";
 
 export default async function handler(req, res) {
   // Configurar CORS
