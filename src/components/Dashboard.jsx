@@ -100,9 +100,14 @@ const Dashboard = () => {
     axios
       .get("/api/datos")
       .then((response) => {
+        console.log("Respuesta API /api/datos:", response.data);
         if (Array.isArray(response.data)) {
           setData(response.data);
           setFilteredData(response.data);
+        } else {
+          console.error("La respuesta no es un arreglo:", response.data);
+          setData([]);
+          setFilteredData([]);
         }
         setDataLoading(false);
       })
@@ -241,10 +246,7 @@ const Dashboard = () => {
 
       {/* BOTONES CENTRADOS BAJO LAS TARJETAS */}
       <div className="dashboard-buttons-container">
-        <button
-          onClick={() => navigate("/asesor")}
-          className="add-asesor-btn"
-        >
+        <button onClick={() => navigate("/asesor")} className="add-asesor-btn">
           ➕ Agregar Asesor
         </button>
         <button
@@ -346,14 +348,15 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.id_usuario}</td>
-                  <td>{item.email_usuario}</td>
-                  <td>{item.nombre_producto}</td>
-                  <td>{item.fecha}</td>
-                </tr>
-              ))}
+              {Array.isArray(filteredData) &&
+                filteredData.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.id_usuario}</td>
+                    <td>{item.email_usuario}</td>
+                    <td>{item.nombre_producto}</td>
+                    <td>{item.fecha}</td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
@@ -397,9 +400,10 @@ const Dashboard = () => {
                   outerRadius={80}
                   label
                 >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
+                  {Array.isArray(chartData) &&
+                    chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
                 </Pie>
                 <Tooltip />
               </PieChart>
@@ -415,12 +419,10 @@ const Dashboard = () => {
                 stroke="#fff"
                 fill="#4D96FF"
               >
-                {treemapData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
+                {Array.isArray(treemapData) &&
+                  treemapData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
               </Treemap>
             </ResponsiveContainer>
           </div>
