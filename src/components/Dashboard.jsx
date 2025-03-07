@@ -46,34 +46,39 @@ const Dashboard = () => {
   const [selectedFilter, setSelectedFilter] = useState("all"); // "all", "day", "month", "year", "range"
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const navigate = useNavigate(); // <-- Hook para navegar
+  const navigate = useNavigate(); // Hook para navegar
 
   // -----------------------------------------------
   // 1. Efecto para validar Magic Link y escuchar cambios de sesión
   // -----------------------------------------------
   useEffect(() => {
-    // Escuchar cambios de autenticación
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      setAuthLoading(false);
     });
-  
-    // Si el usuario ya está logueado, no volvemos a verificar el Magic Link
+
+    // Si ya existe un usuario, no procesamos el Magic Link
     if (user) {
       setAuthLoading(false);
       return () => unsubscribe();
     }
-  
+
     // Verificar si la URL actual contiene un enlace de inicio de sesión (Magic Link)
     if (isSignInWithEmailLink(auth, window.location.href)) {
-      let email = window.localStorage.getItem("emailForSignIn");
+      const email = window.localStorage.getItem("emailForSignIn");
       if (!email) {
-        email = window.prompt("Por favor, ingresa tu correo para confirmar:");
+        console.error("No se encontró el correo en localStorage. Redirigiendo al login.");
+        setAuthLoading(false);
+        navigate("/");
+        return;
       }
-  
+
       signInWithEmailLink(auth, email, window.location.href)
         .then(() => {
           // Eliminamos el correo del localStorage por seguridad
           window.localStorage.removeItem("emailForSignIn");
+          // Limpiar la URL: redirigimos a Dashboard con 'replace' para remover parámetros del Magic Link
+          navigate("/dashboard", { replace: true });
         })
         .catch((error) => {
           console.error("Error al iniciar sesión con Magic Link:", error);
@@ -82,14 +87,11 @@ const Dashboard = () => {
           setAuthLoading(false);
         });
     } else {
-      // Si no es un Magic Link, simplemente cambiamos el estado de loading
       setAuthLoading(false);
     }
-  
-    // Cleanup del listener
+
     return () => unsubscribe();
-  }, [auth, user]);
-  
+  }, [auth, user, navigate]);
 
   // -----------------------------------------------
   // 2. Efecto para obtener los datos de la API
@@ -98,9 +100,14 @@ const Dashboard = () => {
     axios
       .get("/api/datos")
       .then((response) => {
+        console.log("Respuesta API /api/datos:", response.data);
         if (Array.isArray(response.data)) {
           setData(response.data);
           setFilteredData(response.data);
+        } else {
+          console.error("La respuesta no es un arreglo:", response.data);
+          setData([]);
+          setFilteredData([]);
         }
         setDataLoading(false);
       })
@@ -113,12 +120,10 @@ const Dashboard = () => {
   // -----------------------------------------------
   // 3. Manejo de estados de carga
   // -----------------------------------------------
-  // Si aún estamos verificando la autenticación o descargando datos, mostramos un loader
   if (authLoading || dataLoading) {
     return <p className="loading">Cargando...</p>;
   }
 
-  // Si ya no estamos cargando y no hay usuario, significa que NO inició sesión
   if (!user) {
     return (
       <p style={{ textAlign: "center", marginTop: "50px" }}>
@@ -145,7 +150,6 @@ const Dashboard = () => {
       );
     }
 
-    // Convertimos la fecha seleccionada a formato "YYYY-MM-DD", "YYYY-MM" o "YYYY"
     if (selectedFilter === "day" && startDate) {
       const formatted = startDate.toISOString().split("T")[0];
       filtered = filtered.filter((item) => item.fecha.startsWith(formatted));
@@ -240,12 +244,9 @@ const Dashboard = () => {
         </div>
       </div>
 
-       {/* BOTONES CENTRADOS BAJO LAS TARJETAS */}
-       <div className="dashboard-buttons-container">
-        <button
-          onClick={() => navigate("/asesor")}
-          className="add-asesor-btn"
-        >
+      {/* BOTONES CENTRADOS BAJO LAS TARJETAS */}
+      <div className="dashboard-buttons-container">
+        <button onClick={() => navigate("/asesor")} className="add-asesor-btn">
           ➕ Agregar Asesor
         </button>
         <button
@@ -266,7 +267,6 @@ const Dashboard = () => {
                 value={selectedFilter}
                 onChange={(e) => {
                   setSelectedFilter(e.target.value);
-                  // Reiniciamos las fechas al cambiar el tipo de filtro
                   setStartDate(null);
                   setEndDate(null);
                 }}
@@ -348,14 +348,15 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.id_usuario}</td>
-                  <td>{item.email_usuario}</td>
-                  <td>{item.nombre_producto}</td>
-                  <td>{item.fecha}</td>
-                </tr>
-              ))}
+              {Array.isArray(filteredData) &&
+                filteredData.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.id_usuario}</td>
+                    <td>{item.email_usuario}</td>
+                    <td>{item.nombre_producto}</td>
+                    <td>{item.fecha}</td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
@@ -399,9 +400,10 @@ const Dashboard = () => {
                   outerRadius={80}
                   label
                 >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
+                  {Array.isArray(chartData) &&
+                    chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
                 </Pie>
                 <Tooltip />
               </PieChart>
@@ -417,12 +419,10 @@ const Dashboard = () => {
                 stroke="#fff"
                 fill="#4D96FF"
               >
-                {treemapData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
+                {Array.isArray(treemapData) &&
+                  treemapData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
               </Treemap>
             </ResponsiveContainer>
           </div>
