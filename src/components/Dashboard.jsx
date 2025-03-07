@@ -57,7 +57,7 @@ const Dashboard = () => {
       setAuthLoading(false);
     });
 
-    // Si el usuario ya está logueado, no volvemos a verificar el Magic Link
+    // Si ya existe un usuario, no procesamos el Magic Link
     if (user) {
       setAuthLoading(false);
       return () => unsubscribe();
@@ -77,6 +77,8 @@ const Dashboard = () => {
         .then(() => {
           // Eliminamos el correo del localStorage por seguridad
           window.localStorage.removeItem("emailForSignIn");
+          // Limpiar la URL: redirigimos a Dashboard con 'replace' para remover parámetros del Magic Link
+          navigate("/dashboard", { replace: true });
         })
         .catch((error) => {
           console.error("Error al iniciar sesión con Magic Link:", error);
@@ -113,12 +115,10 @@ const Dashboard = () => {
   // -----------------------------------------------
   // 3. Manejo de estados de carga
   // -----------------------------------------------
-  // Si aún estamos verificando la autenticación o descargando datos, mostramos un loader
   if (authLoading || dataLoading) {
     return <p className="loading">Cargando...</p>;
   }
 
-  // Si ya no estamos cargando y no hay usuario, significa que NO inició sesión
   if (!user) {
     return (
       <p style={{ textAlign: "center", marginTop: "50px" }}>
@@ -145,7 +145,6 @@ const Dashboard = () => {
       );
     }
 
-    // Convertimos la fecha seleccionada a formato "YYYY-MM-DD", "YYYY-MM" o "YYYY"
     if (selectedFilter === "day" && startDate) {
       const formatted = startDate.toISOString().split("T")[0];
       filtered = filtered.filter((item) => item.fecha.startsWith(formatted));
@@ -266,7 +265,6 @@ const Dashboard = () => {
                 value={selectedFilter}
                 onChange={(e) => {
                   setSelectedFilter(e.target.value);
-                  // Reiniciamos las fechas al cambiar el tipo de filtro
                   setStartDate(null);
                   setEndDate(null);
                 }}
