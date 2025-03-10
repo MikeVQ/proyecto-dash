@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     try {
       // Verificar duplicado
       const duplicateQuery = `
-        SELECT * FROM public.ah_asignaciones
+        SELECT * FROM public.ah_asignacion_asesores
         WHERE asesor = $1 AND nombre = $2 AND email_usuario = $3 AND origen = $4 AND tipo_negocio = $5
       `;
       const dupRes = await query(duplicateQuery, [
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
       }
       // Insertar el nuevo registro
       const insertQuery = `
-        INSERT INTO public.ah_asignaciones (email_usuario, nombre, origen, tipo_negocio, asesor)
+        INSERT INTO public.ah_asignacion_asesores (email_usuario, nombre, origen, tipo_negocio, asesor)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING *, id_registro AS _id
       `;
@@ -55,7 +55,7 @@ export default async function handler(req, res) {
     try {
       if (all === "true") {
         const result = await query(
-          "SELECT *, id_registro AS _id FROM public.ah_asignaciones ORDER BY id_registro DESC"
+          "SELECT *, id_registro AS _id FROM public.ah_asignacion_asesores ORDER BY id_registro DESC"
         );
         console.log("Listando todos los usuarios:", result.rows);
         return res.status(200).json(result.rows);
@@ -64,7 +64,7 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: "Se requiere el nombre del asesor." });
         }
         const result = await query(
-          "SELECT *, id_registro AS _id FROM public.ah_asignaciones WHERE asesor = $1 ORDER BY id_registro DESC",
+          "SELECT *, id_registro AS _id FROM public.ah_asignacion_asesores WHERE asesor = $1 ORDER BY id_registro DESC",
           [nombre_asesor]
         );
         console.log(`Listando usuarios para asesor ${nombre_asesor}:`, result.rows);
@@ -84,7 +84,7 @@ export default async function handler(req, res) {
     try {
       // Verificar duplicado (excluyendo el registro actual)
       const duplicateQuery = `
-        SELECT * FROM public.ah_asignaciones
+        SELECT * FROM public.ah_asignacion_asesores
         WHERE asesor = $1 AND nombre = $2 AND email_usuario = $3 AND origen = $4 AND tipo_negocio = $5 AND id_registro <> $6
       `;
       const dupRes = await query(duplicateQuery, [
@@ -99,7 +99,7 @@ export default async function handler(req, res) {
         return res.status(409).json({ error: "Este usuario ya existe (duplicado)." });
       }
       const updateQuery = `
-        UPDATE public.ah_asignaciones
+        UPDATE public.ah_asignacion_asesores
         SET email_usuario = $1, nombre = $2, origen = $3, tipo_negocio = $4, asesor = $5
         WHERE id_registro = $6
       `;
@@ -127,7 +127,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Se requiere el id del usuario." });
     }
     try {
-      const deleteQuery = "DELETE FROM public.ah_asignaciones WHERE id_registro = $1";
+      const deleteQuery = "DELETE FROM public.ah_asignacion_asesores WHERE id_registro = $1";
       const deleteRes = await query(deleteQuery, [_id]);
       if (deleteRes.rowCount === 0) {
         return res.status(404).json({ error: "Usuario no encontrado." });

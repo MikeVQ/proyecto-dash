@@ -80,7 +80,7 @@ export default async function handler(req, res) {
 
       // Insertar en la tabla de notificaciones (esquema "ah")
       const insertQuery = `
-        INSERT INTO ah.notificaciones (
+        INSERT INTO public.ah_notificaciones (
           id_usuario, email_usuario, nombre_usuario, url_actual, url_link, fecha,
           email_asesor, asesor, origen_asesor, tipo_negocio_asesor, fecha_notificacion,
           mail_enviado, observaciones, hora_notificacion, nombre_producto, sku_producto

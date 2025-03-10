@@ -22,11 +22,8 @@ export default async function handler(req, res) {
         .json({ error: "No se proporcionó un array de IDs válido." });
     }
 
-    // Se asume que la tabla es "ah_asignaciones" y la columna identificadora es "id_registro"
-    // Utilizamos el operador ANY para eliminar todos los registros cuyos id_registro
-    // estén incluidos en el array ids. Se asume que los IDs son números.
     const deleteQuery = `
-      DELETE FROM public.ah_asignaciones
+      DELETE FROM public.ah_asignacion_asesores
       WHERE id_registro = ANY($1::int[])
     `;
     const result = await query(deleteQuery, [ids]);

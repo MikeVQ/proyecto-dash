@@ -14,10 +14,10 @@ export default async function handler(req, res) {
     try {
       let result;
       if (search) {
-        // Filtrar por asesor o email_asesor de forma insensible a mayúsculas
+        // Filtra por asesor o email_asesor usando ILIKE
         result = await query(
           `SELECT DISTINCT asesor, email_asesor, id_registro AS _id 
-           FROM public.ah_asignaciones 
+           FROM public.ah_asignacion_asesores 
            WHERE asesor ILIKE $1 OR email_asesor ILIKE $1 
            ORDER BY asesor ASC`,
           [`%${search}%`]
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       } else {
         result = await query(
           `SELECT DISTINCT asesor, email_asesor, id_registro AS _id 
-           FROM public.ah_asignaciones 
+           FROM public.ah_asignacion_asesores 
            ORDER BY asesor ASC`
         );
       }
@@ -46,16 +46,16 @@ export default async function handler(req, res) {
       }
       // Verificar duplicado
       const duplicateQuery = `
-        SELECT * FROM public.ah_asignaciones
+        SELECT * FROM public.ah_asignacion_asesores
         WHERE asesor = $1 AND email_asesor = $2
       `;
       const dupRes = await query(duplicateQuery, [nombre_asesor, email_asesor]);
       if (dupRes.rows.length > 0) {
         return res.status(409).json({ error: "Este asesor ya existe (duplicado)." });
       }
-      // Insertar nuevo asesor
+      // Insertar el nuevo asesor
       const insertQuery = `
-        INSERT INTO public.ah_asignaciones (asesor, email_asesor)
+        INSERT INTO public.ah_asignacion_asesores (asesor, email_asesor)
         VALUES ($1, $2)
         RETURNING *, id_registro AS _id
       `;
@@ -78,7 +78,7 @@ export default async function handler(req, res) {
           .json({ error: "Faltan campos obligatorios (nombre_asesor, email_asesor, _id)." });
       }
       const updateQuery = `
-        UPDATE public.ah_asignaciones
+        UPDATE public.ah_asignacion_asesores
         SET asesor = $1, email_asesor = $2
         WHERE id_registro = $3
       `;
@@ -99,7 +99,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Se requiere el id del asesor." });
     }
     try {
-      const deleteQuery = "DELETE FROM public.ah_asignaciones WHERE id_registro = $1";
+      const deleteQuery = "DELETE FROM public.ah_asignacion_asesores WHERE id_registro = $1";
       const deleteRes = await query(deleteQuery, [_id]);
       if (deleteRes.rowCount === 0) {
         return res.status(404).json({ error: "Asesor no encontrado." });
