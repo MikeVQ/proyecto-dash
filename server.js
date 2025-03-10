@@ -10,6 +10,9 @@ import historicoUsuariosHandler from './api/historicoUsuarios.js';
 
 const app = express();
 
+// Indica a Express que confíe en el proxy (necesario para evitar redirecciones innecesarias)
+app.set('trust proxy', true);
+
 // Middleware para parsear JSON en el cuerpo de las peticiones
 app.use(express.json());
 
