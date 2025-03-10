@@ -4,27 +4,36 @@ FROM node:20-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-
-# Instala dependencias
 RUN npm install
 
-# Copia el resto del código
+# Copia todo el código (incluyendo server.js y la carpeta api)
 COPY . .
 
-# Construye el proyecto para producción (asegúrate de que el script build genere la carpeta "dist")
+# Construye el frontend (asegúrate de que npm run build genere la carpeta "dist")
 RUN npm run build
 
-# Etapa final (servidor web ligero)
-FROM nginx:alpine
+# Etapa final: Imagen para producción con Node y Nginx
+FROM node:20-alpine
 
-# Copia la app construida en el directorio web del servidor nginx
+# Instala Nginx
+RUN apk add --no-cache nginx
+
+# Copia la app frontend construida en el directorio web de Nginx
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copia la configuración personalizada de Nginx (actualiza la ruta según la ubicación real)
+# Copia la configuración personalizada de Nginx
 COPY config/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expone el puerto 80 por defecto
+# Copia el código del backend (server.js y la carpeta api)
+COPY --from=build /app/server.js /app/server.js
+COPY --from=build /app/api /app/api
+
+# Copia el script de inicio
+COPY --from=build /app/start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Expone el puerto 80 (Nginx)
 EXPOSE 80
 
-# Inicia nginx (por defecto)
-CMD ["nginx", "-g", "daemon off;"]
+# Inicia el script de arranque
+CMD ["/start.sh"]

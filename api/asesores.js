@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     try {
       let result;
       if (search) {
-        // Se filtra por asesor o email_asesor usando ILIKE para búsqueda insensible a mayúsculas
+        // Filtrar por asesor o email_asesor de forma insensible a mayúsculas
         result = await query(
           `SELECT DISTINCT asesor, email_asesor, id_registro AS _id 
            FROM public.ah_asignaciones 
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
           .status(400)
           .json({ error: "Faltan campos obligatorios (nombre_asesor, email_asesor)." });
       }
-      // Verificar si ya existe un asesor con esos datos
+      // Verificar duplicado
       const duplicateQuery = `
         SELECT * FROM public.ah_asignaciones
         WHERE asesor = $1 AND email_asesor = $2
@@ -53,14 +53,16 @@ export default async function handler(req, res) {
       if (dupRes.rows.length > 0) {
         return res.status(409).json({ error: "Este asesor ya existe (duplicado)." });
       }
-      // Insertar el nuevo asesor
+      // Insertar nuevo asesor
       const insertQuery = `
         INSERT INTO public.ah_asignaciones (asesor, email_asesor)
         VALUES ($1, $2)
         RETURNING *, id_registro AS _id
       `;
       const insertRes = await query(insertQuery, [nombre_asesor, email_asesor]);
-      return res.status(200).json({ success: true, message: "Asesor creado", asesor: insertRes.rows[0] });
+      return res
+        .status(200)
+        .json({ success: true, message: "Asesor creado", asesor: insertRes.rows[0] });
     } catch (error) {
       console.error("Error al crear asesor:", error);
       return res.status(500).json({ error: error.message });
@@ -102,7 +104,9 @@ export default async function handler(req, res) {
       if (deleteRes.rowCount === 0) {
         return res.status(404).json({ error: "Asesor no encontrado." });
       }
-      return res.status(200).json({ success: true, message: "Asesor eliminado correctamente." });
+      return res
+        .status(200)
+        .json({ success: true, message: "Asesor eliminado correctamente." });
     } catch (error) {
       console.error("Error al eliminar asesor:", error);
       return res.status(500).json({ error: "Error interno del servidor." });
