@@ -1,5 +1,7 @@
 #!/bin/sh
-# Inicia el backend en segundo plano (escuchando en el puerto 5000)
+echo "Iniciando backend..."
 node /app/server.js &
-# Inicia Nginx en primer plano
+echo "Esperando 5 segundos para que el backend se inicie..."
+sleep 5
+echo "Iniciando Nginx..."
 nginx -g "daemon off;"
