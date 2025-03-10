@@ -17,7 +17,7 @@ app.set('trust proxy', true);
 app.use(express.json());
 
 // Configura las rutas para tus endpoints
-app.all('/api/asesores', (req, res) => {
+app.all('/asesores', (req, res) => {
   return asesoresHandler(req, res);
 });
 
