@@ -39,6 +39,6 @@ app.all('/api/historicoUsuarios', (req, res) => {
 
 // Arranca el servidor en el puerto definido (por defecto 5000)
 const port = process.env.PORT_API || 5000;
-app.listen(port, () => {
-  console.log(`Backend escuchando en el puerto ${port}`);
-});
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Backend escuchando en el puerto ${port}`);
+  });

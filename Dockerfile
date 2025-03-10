@@ -25,7 +25,7 @@ COPY --from=build /app/dist /usr/share/nginx/html
 COPY config/nginx.conf /etc/nginx/nginx.conf
 
 # Copia el código del backend (server.js y la carpeta api)
-COPY --from=build /app/server.js /app/server.js
+COPY --from=build /app/server.mjs /app/server.mjs
 COPY --from=build /app/api /app/api
 
 # Copia el script de inicio
