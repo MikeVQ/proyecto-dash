@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 
-# Copia todo el código (incluyendo server.js y la carpeta api)
+# Copia todo el código (incluyendo server.mjs y la carpeta api)
 COPY . .
 
 # Construye el frontend (asegúrate de que npm run build genere la carpeta "dist")
@@ -24,9 +24,13 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # Copia la configuración personalizada de Nginx
 COPY config/nginx.conf /etc/nginx/nginx.conf
 
-# Copia el código del backend (server.js y la carpeta api)
+# Copia el código del backend (server.mjs y la carpeta api)
 COPY --from=build /app/server.mjs /app/server.mjs
 COPY --from=build /app/api /app/api
+
+# Copia las dependencias instaladas
+COPY --from=build /app/node_modules /app/node_modules
+COPY --from=build /app/package.json /app/package.json
 
 # Copia el script de inicio
 COPY --from=build /app/start.sh /start.sh

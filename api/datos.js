@@ -8,6 +8,7 @@ import { query } from "./dbConnection.js";
  * email_asesor, asesor, origen_asesor, tipo_negocio_asesor, fecha_notificacion,
  * mail_enviado, observaciones, hora_notificacion, nombre_producto, sku_producto.
  */
+console.log(req.url)
 export default async function handler(req, res) {
   // Habilitar CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
